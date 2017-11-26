@@ -1,6 +1,6 @@
 <div align="center">
-    <h2>Taco Charts</h2>
     <img src="https://raw.githubusercontent.com/ArchitectureAnalyse/Taco/master/public/taco.png" height="128">
+    <h2>Taco Charts</h2>
 </div>
 
 ## How to start
