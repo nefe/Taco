@@ -10,4 +10,4 @@
 
 ## License
 
-[MIT](LICENSE).
+MIT
