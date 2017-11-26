@@ -1,3 +1,3 @@
-import update from './update';
+import update from './index';
 
 update();
