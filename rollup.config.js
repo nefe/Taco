@@ -8,7 +8,7 @@ import typescript from 'rollup-plugin-typescript';
 const production = !process.env.ROLLUP_WATCH;
 
 export default {
-  entry: 'src/main.ts',
+  entry: 'src/demo.ts',
   dest: 'public/bundle.js',
   format: 'iife', // immediately-invoked function expression — suitable for <script> tags
   plugins: [

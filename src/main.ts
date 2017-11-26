@@ -1,3 +1,3 @@
-import update from './update';
-
-update();
+export default function update() {
+  console.log('update');
+}
