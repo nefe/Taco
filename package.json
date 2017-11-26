@@ -1,0 +1,20 @@
+{
+  "name": "rollup-starter-app",
+  "devDependencies": {
+    "npm-run-all": "^4.1.2",
+    "rollup": "^0.51.8",
+    "rollup-plugin-commonjs": "^8.0.2",
+    "rollup-plugin-node-resolve": "^3.0.0",
+    "rollup-plugin-uglify": "^2.0.1",
+    "typescript": "^2.2.0",
+    "rollup-plugin-typescript": "^0.8.1",
+    "serve": "^6.4.1"
+  },
+  "dependencies": {},
+  "scripts": {
+    "build": "rollup -c",
+    "watch": "rollup -c -w",
+    "start": "npm-run-all --parallel serve watch",
+    "serve": "serve public"
+  }
+}

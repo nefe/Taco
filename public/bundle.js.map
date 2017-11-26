@@ -1,0 +1,1 @@
+{"version":3,"file":"bundle.js","sources":["../src/update.ts","../src/main.ts"],"sourcesContent":["export default function update() {\n  console.log('update');\n}\n","import update from './update';\n\nupdate();"],"names":[],"mappings":";;;;IACE,OAAO,CAAC,GAAG,CAAC,QAAQ,CAAC,CAAC;CACvB;;;ACAD,MAAM,EAAE,CAAC;;;;;"}

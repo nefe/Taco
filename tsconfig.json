@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "noImplicitAny": false,
+    "declaration": false,
+    "target": "es5",
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "jsx": "react",
+    "sourceMap": true,
+    "outDir": "built",
+    "moduleResolution": "node",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "baseUrl": ".",
+    "allowSyntheticDefaultImports": true,
+    "lib": ["es6", "dom"]
+  },
+  "include": ["./src/**/*"],
+  "exclude": ["node_modules", "build"]
+}
