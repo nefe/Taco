@@ -41,10 +41,7 @@ const chart = new Chart({
   type: 'bar', // or 'line', 'scatter', 'pie', 'percentage'
   height: 250,
 
-  colors: ['#7cd6fd', '#743ee2'],
-
-  format_tooltip_x: d => (d + '').toUpperCase(),
-  format_tooltip_y: d => d + ' pts'
+  colors: ['#7cd6fd', '#743ee2']
 });
 ```
 
