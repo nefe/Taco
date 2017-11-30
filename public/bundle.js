@@ -1,47 +1,92 @@
 (function () {
 'use strict';
 
-function __extends(d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+function getElementContentWidth(element) {
+    var styles = window.getComputedStyle(element);
+    var padding = parseFloat(styles.paddingLeft) + parseFloat(styles.paddingRight);
+    return element.clientWidth - padding;
 }
+function floatTwo(number) {
+    return parseFloat(number.toFixed(2));
+}
+//# sourceMappingURL=utils.js.map
 
-var BaseChart = (function () {
-    function BaseChart(args) {
-        this.initContainer();
+var DEFAULT_HEIGHT = 240;
+function calcIntervals(maxValue, minValue) {
+    var ticks = [];
+    var diff = minValue > 0 ? maxValue : maxValue - minValue;
+    var initInterval = diff / 5;
+    var exp = Math.floor(Math.log10(initInterval));
+    var finalInterval = Math.ceil(initInterval / Math.pow(10, exp)) * Math.pow(10, exp);
+    var downCount = 0;
+    while (0 - downCount * finalInterval >= minValue) {
+        ticks.unshift(0 - downCount * finalInterval);
+        downCount++;
     }
-    BaseChart.prototype.initContainer = function () {
-        console.log('init BaseChart');
-    };
-    return BaseChart;
-}());
-
-var Line = (function (_super) {
-    __extends(Line, _super);
-    function Line(args) {
-        var _this = _super.call(this, args) || this;
-        _this.init();
-        return _this;
+    if (minValue <= 0) {
+        ticks.unshift(0 - downCount * finalInterval);
     }
-    Line.prototype.init = function () {
-        console.log('line');
-    };
-    return Line;
-}(BaseChart));
-
-var Chart = (function () {
-    function Chart(args) {
-        switch (args.type) {
-            case 'line': {
-                return new Line(args);
-            }
-            case 'pie': 
-            default:
-                break;
+    var upCount = 0;
+    while (0 + upCount * finalInterval <= maxValue) {
+        if (!(ticks[ticks.length - 1] === 0 && 0 + upCount * finalInterval === 0)) {
+            ticks.push(0 + upCount * finalInterval);
         }
+        upCount++;
     }
-    return Chart;
+    if (maxValue >= 0) {
+        ticks.push(0 + upCount * finalInterval);
+    }
+    return ticks;
+}
+var XAxis = (function () {
+    function XAxis() {
+    }
+    return XAxis;
+}());
+var YAxis = (function () {
+    function YAxis() {
+    }
+    return YAxis;
+}());
+var BarChart = (function () {
+    function BarChart(config) {
+        this.xAxis = new XAxis();
+        this.yAxis = new YAxis();
+        this.config = config;
+        this.calculate();
+        this.render();
+    }
+    BarChart.prototype.calculate = function () {
+        this.getSize();
+        this.getAxis();
+    };
+    BarChart.prototype.render = function () {
+    };
+    BarChart.prototype.getSize = function () {
+        if (typeof this.config.parent === 'string') {
+            this.parent = document.querySelector(this.config.parent);
+        }
+        else {
+            this.parent = this.config.parent;
+        }
+        this.width = getElementContentWidth(this.parent);
+        this.height = DEFAULT_HEIGHT;
+    };
+    BarChart.prototype.getAxis = function () {
+        var _this = this;
+        this.data = this.config.data;
+        this.xAxis.unitWidth = this.width / this.data.labels.length;
+        this.xAxis.startPosList = this.data.labels.map(function (label, i) {
+            return floatTwo(i * _this.xAxis.unitWidth);
+        });
+        var allValues = this.data.datasets.reduce(function (pre, dataset) {
+            return pre.concat(dataset.values);
+        }, []);
+        var maxValue = Math.max.apply(Math, allValues);
+        var minValue = Math.min.apply(Math, allValues);
+        this.yAxis.ticks = calcIntervals(maxValue, minValue);
+    };
+    return BarChart;
 }());
 
 var data = {
@@ -63,16 +108,17 @@ var data = {
         {
             title: 'Another Set',
             values: [25, 50, -10, 15, 18, 32, 27, 14]
+        },
+        {
+            title: "Yet Another",
+            values: [15, 20, -3, -15, 58, 12, -17, 37]
         }
     ]
 };
-var chart = new Chart({
-    parent: 'line',
-    title: 'My Chart',
+var chart = new BarChart({
+    parent: document.getElementById('barchart'),
+    height: 400,
     data: data,
-    type: 'line',
-    height: 250,
-    colors: ['#7cd6fd', '#743ee2']
 });
 //# sourceMappingURL=demo.js.map
 

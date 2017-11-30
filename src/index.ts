@@ -1,6 +1,6 @@
 import { Line } from './charts/line';
+import Bar from './charts/Bar';
 import { Iargs } from './index.d';
-
 
 export default class Chart {
   constructor(args: Iargs) {
@@ -9,6 +9,8 @@ export default class Chart {
       case 'line': {
         return new Line(args);
       }
+      case 'bar': {
+      }  
       case 'pie': {
       }
       default:
