@@ -1,4 +1,5 @@
 import Chart from './index';
+import BarChart from './charts/Bar';
 
 const data = {
   labels: [
@@ -19,10 +20,15 @@ const data = {
     {
       title: 'Another Set',
       values: [25, 50, -10, 15, 18, 32, 27, 14]
+    },
+    {
+      title: "Yet Another",
+      values: [15, 20, -3, -15, 58, 12, -17, 37]
     }
   ]
 };
 
+/*
 const chart = new Chart({
   parent: 'line',
   title: 'My Chart',
@@ -30,4 +36,11 @@ const chart = new Chart({
   type: 'line', // or 'line', 'scatter', 'pie', 'percentage'
   height: 250,
   colors: ['#7cd6fd', '#743ee2']
+});
+*/
+
+const chart = new BarChart({
+  parent: document.getElementById('barchart'),
+  height: 400,
+  data,
 });
