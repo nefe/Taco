@@ -30,15 +30,30 @@ var Line = (function (_super) {
     return Line;
 }(BaseChart));
 
+var Scatter = (function (_super) {
+    __extends(Scatter, _super);
+    function Scatter(args) {
+        var _this = _super.call(this, args) || this;
+        _this.init();
+        return _this;
+    }
+    Scatter.prototype.init = function () {
+        console.log('Scatter');
+    };
+    return Scatter;
+}(BaseChart));
+
 var Chart = (function () {
     function Chart(args) {
         switch (args.type) {
             case 'line': {
                 return new Line(args);
             }
-            case 'pie': 
+            case 'scatter': {
+                return new Scatter(args);
+            }
             default:
-                break;
+                return new Line(args);
         }
     }
     return Chart;
@@ -74,7 +89,6 @@ var chart = new Chart({
     height: 250,
     colors: ['#7cd6fd', '#743ee2']
 });
-//# sourceMappingURL=demo.js.map
 
 }());
 //# sourceMappingURL=bundle.js.map

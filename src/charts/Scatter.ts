@@ -4,14 +4,14 @@
 import BaseChart from './baseChart';
 import { Args } from '../index.d';
 
-class Line extends BaseChart {
+class Scatter extends BaseChart {
   constructor(args: Args) {
     super(args);
     this.init();
   }
   init() {
-    console.log('line');
+    console.log('Scatter');
   }
 }
 
-export default Line;
+export default Scatter;

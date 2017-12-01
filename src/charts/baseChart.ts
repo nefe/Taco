@@ -1,10 +1,10 @@
 /**
  * @file Base chart
  */
-import { Iargs } from '../index.d';
+import { Args } from '../index.d';
 
 class BaseChart {
-  constructor(args: Iargs) {
+  constructor(args: Args) {
     this.initContainer();
   }
   initContainer() {
@@ -12,4 +12,4 @@ class BaseChart {
   }
 }
 
-export { BaseChart };
+export default BaseChart;

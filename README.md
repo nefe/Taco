@@ -3,6 +3,8 @@
     <h2>Taco Charts</h2>
 </div>
 
+# This is a home-made chart library inspired by https://github.com/frappe/charts
+
 ## How to start
 
 `npm start` launches a server, Navigate to

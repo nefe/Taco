@@ -31,3 +31,12 @@ const chart = new Chart({
   height: 250,
   colors: ['#7cd6fd', '#743ee2']
 });
+
+const scatterChart = new Chart({
+  parent: '#scatter-chart', // 渲染到的dom节点选择器
+  title: 'Scatter Chart',
+  data: data,
+  type: 'scatter', // or 'line', 'scatter', 'pie', 'percentage'
+  height: 250,
+  colors: ['#7cd6fd', '#743ee2']
+});
