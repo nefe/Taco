@@ -40,7 +40,8 @@ const lineChart = new Chart({
 
 const chart = new BarChart({
   parent: document.getElementById('barchart'),
-  height: 400,
+  height: 300,
+  colors: ['#7cd6fd', '#743ee2', '#5e64ff'],
   data,
 });
 

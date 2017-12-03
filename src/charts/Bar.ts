@@ -1,4 +1,4 @@
-import { getElementContentWidth, floatTwo } from "src/charts/utils";
+import { getElementContentWidth, floatTwo, $ } from "src/charts/utils";
 
 /**
  * 分层的解耦思想
@@ -7,7 +7,8 @@ import { getElementContentWidth, floatTwo } from "src/charts/utils";
  * 坏处，自制驱动引擎？动画
  */
 
-const DEFAULT_HEIGHT = 240;
+/** 图默认高度 */
+const DEFAULT_HEIGHT = 240; 
 
 /**
  * 根据最大最小值确定分度，原来代码这部分做得太啰嗦
@@ -21,7 +22,7 @@ function calcIntervals(maxValue: number, minValue: number): number[] {
   const ticks = [];
   // 始终以 0 为基准，
   const diff = minValue > 0 ? maxValue : maxValue - minValue;
-  const initInterval = diff / 5;
+  const initInterval = diff / 6;
   const exp = Math.floor(Math.log10(initInterval));
   const finalInterval = Math.ceil(initInterval / Math.pow(10, exp)) * Math.pow(10, exp);
 
@@ -44,7 +45,7 @@ function calcIntervals(maxValue: number, minValue: number): number[] {
     ticks.push(0 + upCount * finalInterval);
   }
 
-  return ticks;
+  return ticks.reverse();
 }
 
 // console.log(calcIntervals(200, 20));
@@ -65,24 +66,82 @@ interface BarChartConfig {
   height?: number;
   /** 图表数据 */
   data?: Data;
+  /** 颜色数据 */
+  colors: string[];
+}
+
+interface XAxisUnit {
+  /** 柱状图开始点 */
+  startBarPos: number;
+  /** bar 宽度 */
+  barWidth: number;
+  /** 中心点 */
+  centerPos: number;
+  /** 处理后，超出 unit 区域 ... */
+  text: string;
+  /** 新-老的差值，中心点 */
+  diffCenterPos?: number;
 }
 
 class XAxis {
   /** 单元宽度 */
   unitWidth: number;
-  /** 每个单元的起始位置 */
-  startPosList: number[];
+  /** 轴高度 */
+  axisHeight = 6;
+  /** x轴高度 */
+  height = 40;
+  /** 两侧空隙 */
+  padding = 80;
+  /** 每个单元的位置 */
+  unitList: XAxisUnit[] = [];
+}
+
+class YAxisUnit {
+  /** 处理后，部分太大，科学计数法 */
+  text: string;
+  /** 竖直位置 */
+  pos: number;
+  /** 新-老的差值，竖直位置 */
+  diffPos?: number;
 }
 
 class YAxis {
-  /** 分度值 */
-  ticks: number[];
+  /** 分度值List */
+  ticks: number[] = [];
+  /** 起始位置，与 text 的长短有关 */
+  startPos: number;
+  /** 结束位置 */
+  endPos: number;
+  /** 每个单元的位置 */
+  unitList: YAxisUnit[] = [];
+  /** 零轴位置 */
+  zeroPos: number;
+  /** 每个长度代表的value */
+  valueInterval: number;
+}
+
+interface DataPos {
+  value: number;
+  startX: number;
+  startY: number;
+  width: number;
+  height: number;
+  /** 新-老的差值，y 轴方向上 */
+  diff?: number;
 }
 
 class BarChart {
+  xAxisGroup: SVGElement;
+  yAxisGroup: SVGElement;
+  svg: SVGElement;
+  chartWrapper: any;
+  container: HTMLElement;
   data: Data;
   config: BarChartConfig;
   parent: Element;
+  /** 是否已存在值，已存在就要触发 animation */
+  isExist: boolean;
+  dataPos: DataPos[][];
 
   width: number;
   height: number;
@@ -93,6 +152,7 @@ class BarChart {
   constructor(config: BarChartConfig) {
     this.config = config;
     this.calculate();
+    this.isExist = true;
     this.render();
   }
 
@@ -102,26 +162,39 @@ class BarChart {
   calculate() {
     this.getSize();
     this.getAxis();
+    this.getValue();
   }
 
   /**
    * 渲染模块
    */
   render() {
+    this.renderContainer();
+    this.renderAxis();
+    this.renderValue();
+  }
 
+  /**
+   * 更新模块
+   */
+  update(data: Data) {
+    // this.calculate();
   }
 
   /**
    * 设置图表大小，可抽象为 Base
    */
   getSize() {
+    // 当前图表已存在，此部不需要再做
+    if (this.isExist) return;
+
     if (typeof this.config.parent === 'string') {
       this.parent = document.querySelector(this.config.parent);
     } else {
       this.parent = this.config.parent;
     }
     this.width = getElementContentWidth(this.parent);
-    this.height = DEFAULT_HEIGHT;
+    this.height = this.config.height || DEFAULT_HEIGHT;
   }
 
   /**
@@ -131,9 +204,21 @@ class BarChart {
     this.data = this.config.data;
 
     // x 轴
-    this.xAxis.unitWidth = this.width / this.data.labels.length;
-    this.xAxis.startPosList = this.data.labels.map((label, i) => {
-      return floatTwo(i * this.xAxis.unitWidth);
+    this.xAxis.unitWidth = (this.width - this.xAxis.padding * 2) / this.data.labels.length;
+    const charWidth = 8;
+    const barWidth = this.xAxis.unitWidth * (2 / 3) / (this.data.datasets.length);
+    this.xAxis.unitList = this.data.labels.map((label, i) => {
+      // 需要考虑 label 过长的情况，获取字符串的长度
+      const labelWidth = label.length * charWidth;
+      const centerPos = floatTwo(i * this.xAxis.unitWidth + this.xAxis.padding + this.xAxis.unitWidth / 2);
+      return {
+        barWidth,
+        startBarPos: i * this.xAxis.unitWidth + this.xAxis.padding + this.xAxis.unitWidth * (1 / 3) / 2,
+        centerPos,
+        text: labelWidth > this.xAxis.unitWidth ? `${label.slice(0, this.xAxis.unitWidth / charWidth)}...` : label,
+        // 当前存在，则发生偏移，不存在的直接出现
+        // diffCenterPos: this.xAxis.unitList.length - 1 > i ? this.xAxis.unitList[i].centerPos - centerPos : 0,
+      };
     });
 
     // y 轴
@@ -145,7 +230,174 @@ class BarChart {
     const maxValue = Math.max(...allValues);
     const minValue = Math.min(...allValues);
 
+    // padding 为 x 轴高度
+    const padding = this.xAxis.height;
+
+    const oldTicks = [...this.yAxis.ticks];
     this.yAxis.ticks = calcIntervals(maxValue, minValue);
+    const heightInterval = (this.height - padding * 2) / (this.yAxis.ticks.length - 1);
+    this.yAxis.valueInterval = (this.height - padding * 2) / (this.yAxis.ticks[0] - this.yAxis.ticks[this.yAxis.ticks.length - 1]);
+
+    // 最大的开始位置
+    const statPosLimit = this.xAxis.padding;
+    const maxTick = Math.max(Math.abs(this.yAxis.ticks[0]), Math.abs(this.yAxis.ticks[this.yAxis.ticks.length - 1]));
+    const maxTickLength = String(maxTick).length * charWidth;
+    this.yAxis.startPos = (statPosLimit < maxTickLength ? statPosLimit : maxTickLength) + 10;
+    this.yAxis.endPos = this.width - this.yAxis.startPos * 2;
+
+    this.yAxis.unitList = this.yAxis.ticks.map((tick, index) => {
+      // @Todo 太长考虑用科学计数法代替
+      if (tick === 0) {
+        this.yAxis.zeroPos = padding + heightInterval * index;
+      }
+      return {
+        pos: padding + heightInterval * index,
+        text: String(tick),
+        // diffPos:
+      };
+    });    
+  }
+
+  /** 设置各个值在 x 轴与 y 轴的真实位置 */
+  getValue() {
+    this.dataPos = this.data.datasets.map((dataset, index) => {
+      const { values } = dataset;
+      return values.map((value, i) => {
+        const { barWidth, startBarPos } = this.xAxis.unitList[i];
+        const startX = startBarPos + barWidth * index;
+        const height = Math.abs(value) * this.yAxis.valueInterval;
+        if (value < 0) {
+          return {
+            value: value,
+            startX,
+            startY: this.yAxis.zeroPos,
+            width: barWidth,
+            height,
+          };
+        }
+        return {
+          value: value,
+          startX,
+          startY: this.yAxis.zeroPos - height,
+          width: barWidth,
+          height,
+        }
+      });
+    });
+  }
+
+  /** 渲染外容器 */
+  renderContainer() {
+    this.container = $.create('div', {
+      className: 'chart-container',
+      innerHTML: `<div class="frappe-chart graphics"></div>`,
+    });
+    this.parent.innerHTML = '';
+    this.parent.appendChild(this.container);
+
+    this.chartWrapper = this.container.querySelector('.frappe-chart');
+
+    this.svg = $.createSVG('svg', {
+      className: 'chart',
+      inside: this.chartWrapper,
+      width: this.width,
+      height: this.height,
+    });
+  }
+
+  /** 渲染坐标 */
+  renderAxis() {
+    // 渲染 y 轴坐标
+    this.yAxisGroup = $.createSVG('g', {
+      className: 'y-axis',
+      inside: this.svg,
+    });
+
+    this.yAxis.unitList.forEach((unit, index) => {
+      const { pos, text } = unit;
+
+      const yAxisTick = $.createSVG('g', {
+        className: 'y-axis-tick',
+        inside: this.yAxisGroup,
+        transform: `translate(0, ${pos})`,
+      });
+
+      const yAxisLine = $.createSVG('line', {
+        className: text === '0' ? 'y-axis-line y-axis-line-zero' : 'y-axis-line',
+        x1: this.yAxis.startPos,
+        x2: this.yAxis.endPos,
+        y1: 0,
+        y2: 0
+      });
+
+      const yAxisText = $.createSVG('text', {
+        className: 'y-axis-text',
+        x: this.yAxis.startPos - 6,
+        y: 0,
+        dy: '.32em',
+        innerHTML: text,
+      });
+
+      yAxisTick.appendChild(yAxisLine);
+      yAxisTick.appendChild(yAxisText);
+    });
+
+    // 渲染 x 轴坐标
+    this.xAxisGroup = $.createSVG('g', {
+      className: 'x-axis',
+      inside: this.svg,
+      transform: `translate(0, ${this.height - this.xAxis.height})`,
+    });
+
+    this.xAxis.unitList.forEach((unit, index) => {
+      const { centerPos, text } = unit;
+
+      const xAxisTick = $.createSVG('g', {
+        className: 'x-axis-tick',
+        inside: this.xAxisGroup,
+        transform: `translate(${centerPos}, 0)`,
+      });
+      const xAxisLine = $.createSVG('line', {
+        className: 'x-axis-line',
+        x1: 0,
+        x2: 0,
+        y1: 0,
+        y2: this.xAxis.axisHeight,
+      });
+      const xAxisText = $.createSVG('text', {
+        className: 'x-axis-text',
+        innerHTML: text,
+        x: 0,
+        dy: '.9em',
+        y: this.xAxis.axisHeight,
+      });
+
+      xAxisTick.appendChild(xAxisLine);
+      xAxisTick.appendChild(xAxisText);
+    });    
+  }
+
+  renderValue() {
+    this.dataPos.forEach((data, index) => {
+      const color = this.config.colors[index];
+      const dataG = $.createSVG('g', {
+        className: 'data-points',
+        inside: this.svg,
+      });
+      data.forEach(pos => {
+        const { value, startX, startY, width, height } = pos;
+        const dataRect = $.createSVG('rect', {
+          className: 'bar',
+          x: startX,
+          y: startY,
+          width,
+          height,
+          fill: color,
+        });
+
+        dataG.appendChild(dataRect);
+      });
+    });
   }
 }
 
