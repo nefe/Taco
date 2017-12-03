@@ -2,3 +2,5 @@
 node_modules
 package-lock.json
 *.log
+public/bundle.js
+public/bundle.js.map

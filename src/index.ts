@@ -1,4 +1,4 @@
-import { Line } from './charts/line';
+import { Line } from './charts/Line';
 import Bar from './charts/Bar';
 import { Iargs } from './index.d';
 
@@ -10,7 +10,7 @@ export default class Chart {
         return new Line(args);
       }
       case 'bar': {
-      }  
+      }
       case 'pie': {
       }
       default:

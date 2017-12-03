@@ -28,8 +28,7 @@ const data = {
   ]
 };
 
-/*
-const chart = new Chart({
+const lineChart = new Chart({
   parent: 'line',
   title: 'My Chart',
   data: data,
@@ -37,7 +36,6 @@ const chart = new Chart({
   height: 250,
   colors: ['#7cd6fd', '#743ee2']
 });
-*/
 
 const chart = new BarChart({
   parent: document.getElementById('barchart'),

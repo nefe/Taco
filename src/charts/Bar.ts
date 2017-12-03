@@ -14,8 +14,8 @@ const DEFAULT_HEIGHT = 240;
  * 问题抽象，在已知最大值与最小值的情况下，不限制间隔与数量的情况下，如何让坐标轴刻度尽可能美观
  * G2 实现也很啰嗦 https://github.com/antvis/g2/blob/724872cee56d7e731b1d945444b7b10d4d0ef2e8/src/scale/auto/number.js
  * 想到一个 简单方法，最大值 - 最小值差值 / 4 向上取整数量级
- * @param maxValue 
- * @param minValue 
+ * @param maxValue
+ * @param minValue
  */
 function calcIntervals(maxValue: number, minValue: number): number[] {
   const ticks = [];
