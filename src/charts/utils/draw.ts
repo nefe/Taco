@@ -123,3 +123,19 @@ export function makeXLine(
 
   return xLine;
 }
+
+export function makePath(
+  pathStr: any[],
+  className = '',
+  stroke = 'none',
+  fill = 'none'
+) {
+  return createSVG('path', {
+    className: className,
+    d: pathStr,
+    styles: {
+      stroke: stroke,
+      fill: fill
+    }
+  });
+}

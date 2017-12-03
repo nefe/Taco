@@ -34,7 +34,7 @@ const lineChart = new Chart({
   data: data,
   type: 'line', // or 'line', 'scatter', 'pie', 'percentage'
   height: 250,
-  colors: ['#7cd6fd', '#743ee2']
+  colors: ['#7cd6fd', 'violet', 'blue']
 });
 
 const chart = new BarChart({

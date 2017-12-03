@@ -8,12 +8,15 @@ import { getStringWidth } from './utils';
 const Y_AXIS_NUMBER = 6;
 
 class AxisChart extends BaseChart {
-  private xAxisContainer: SVGElement;
-  private yAxisContainer: SVGElement;
-  private drawHeight: number;
-  private drawWidth: number;
-  private labels: string[];
-  private datasets: object[];
+  public xAxisContainer: SVGElement;
+  public yAxisContainer: SVGElement;
+  public drawHeight: number;
+  public drawWidth: number;
+  public labels: string[];
+  public datasets: object[];
+  public xPositons: number[] = [];
+  public yPositions: number[] = [];
+  public yValues: number[] = [];
   constructor(args: Iargs) {
     super(args);
     const { data } = args;
@@ -42,11 +45,11 @@ class AxisChart extends BaseChart {
     // TODO: 待考虑 0 的情况
     const max = Math.max(...yValues);
     const min = Math.min(...yValues);
-    const interval = (max - min) / Y_AXIS_NUMBER;
+    const interval = (max - min) / Y_AXIS_NUMBER + 2;
     const middle = (max + min) / 2;
     const yAxisValues = [];
     for (let i = 0; i < Y_AXIS_NUMBER; i++) {
-      const firstValue = middle - interval * 2.5;
+      const firstValue = middle - interval * 3;
       const value = firstValue + (interval * i);
       yAxisValues.push(value);
     }
@@ -66,6 +69,8 @@ class AxisChart extends BaseChart {
     const yPosInterval = this.drawHeight / 6;
     yAxisValues.map((value, index) => {
       const yPos = this.drawHeight - 20 - (yPosInterval * index);
+      this.yPositions.push(yPos);
+      this.yValues.push(value);
       this.drawYAxis(value, index, yPos);
     });
   }
@@ -73,8 +78,9 @@ class AxisChart extends BaseChart {
     const interval = this.drawWidth / (this.labels.length - 1);
     this.labels.forEach((label, index) => {
       const xPos = interval * (index) + 15;
+      this.xPositons.push(xPos);
       this.dragXAxis(label, xPos);
-    })
+    });
   }
   dragXAxis(label: string, xPos: number) {
     const textStartAt = this.drawHeight - 9;
