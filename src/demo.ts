@@ -1,5 +1,6 @@
 import Chart from './index';
 import BarChart from './charts/Bar';
+import ScatterChart from './charts/Scatter';
 
 const data = {
   labels: [
@@ -41,4 +42,29 @@ const chart = new BarChart({
   parent: document.getElementById('barchart'),
   height: 400,
   data,
+});
+
+
+const scatterData = {
+  datasets: [
+    {
+      title: 'size',
+      values: [10, 2, 3, 4, 3, 2, 8]
+    },
+    {
+      title: 'year',
+      values: [30, 300, 232.23, 422, 322, 423, 283]
+    },
+    {
+      title: "price",
+      values: [1000, 5000, 2000, 3000, 3230, 4829, 3990]
+    }
+  ]
+}
+
+new ScatterChart({
+  parent: document.getElementById('scatter-chart'),
+  height: 250,
+  pattern: ['size', 'year', 'price'],
+  data: scatterData,
 });
