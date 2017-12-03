@@ -1,10 +1,10 @@
 /**
  * @file Line chart
  */
-import { BaseChart } from './BaseChart';
+import { AxisChart } from './AxisChart';
 import { Iargs } from '../index.d';
 
-class Line extends BaseChart {
+class Line extends AxisChart {
   constructor(args: Iargs) {
     super(args);
     this.init();

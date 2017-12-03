@@ -3,21 +3,22 @@
  */
 import { Iargs } from '../index.d';
 import { createSVG } from './utils/draw';
+import { createDrawAreaComponent } from './utils/draw';
 
 class BaseChart {
-  private args: Iargs;
-  private title: string;
-  private subTitle: string;
-  private type: 'line' | 'pie' | 'bar' | 'scatter' | 'percentage';
-  private parent: HTMLElement;
-  private chartWrapper: HTMLElement;
-  private chartWidth: number;
-  private chartHeight: number;
-  private svg: SVGElement;
-  private svgDefs: SVGElement;
-  private drawArea: SVGElement;
-  private translateX: number;
-  private translateY: number;
+  public args: Iargs;
+  public title: string;
+  public subTitle: string;
+  public type: 'line' | 'pie' | 'bar' | 'scatter' | 'percentage';
+  public parent: HTMLElement;
+  public chartWrapper: HTMLElement;
+  public chartWidth: number;
+  public chartHeight: number;
+  public svg: SVGElement;
+  public svgDefs: SVGElement;
+  public drawArea: SVGElement;
+  public translateX: number;
+  public translateY: number;
   constructor(args: Iargs) {
     this.args = args;
     this.setup();
@@ -29,7 +30,6 @@ class BaseChart {
 
     this.initChartArea();
     this.initDrawArea();
-
   }
   getValues() {
     const { title, subTitle, parent, height, type } = this.args;
