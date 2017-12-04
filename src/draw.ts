@@ -3,12 +3,12 @@
  * @param tag 标签名
  * @param o 对象
  */
-export function createSVG(tag: string, o: any) {
+export function createSVG(tag: string, options: any) {
   const element = document.createElementNS("http://www.w3.org/2000/svg", tag);
 
-  for (let key in o) {
-    if (o.hasOwnProperty(key)) {
-      const val = o[key];
+  for (let key in options) {
+    if (options.hasOwnProperty(key)) {
+      const val = options[key];
       if (key === 'inside') {
         val.appendChild(element);
       } else if (key === 'styles') {
@@ -18,8 +18,9 @@ export function createSVG(tag: string, o: any) {
           });
         }
       } else {
-        if (key === 'className') { key = 'class'; } // 兼容 react 中的 className
-        if (key === 'innerHTML') {
+        if (key === 'className') {
+          key = 'class'; // 兼容 react 中的 className
+        } else if (key === 'innerHTML') {
           element['textContent'] = val;
         } else {
           // 设置属性，最重要的一行
