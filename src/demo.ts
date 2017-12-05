@@ -1,6 +1,7 @@
 import Chart from './index';
 import BarChart from './charts/Bar';
 import ScatterChart from './charts/Scatter';
+import {Pie} from 'src/charts/Pie';
 
 const data = {
   labels: [
@@ -16,7 +17,7 @@ const data = {
   datasets: [
     {
       title: 'Some Data',
-      values: [25, 40, 30, 35, 8, 52, 17, -4]
+      values: [12, 40, 30, 35, 8, 52, 17, -4]
     },
     {
       title: 'Another Set',
@@ -69,3 +70,15 @@ new ScatterChart({
   pattern: ['size', 'year', 'price'],
   data: scatterData,
 });
+
+
+new Pie({
+  parent: document.getElementById('pie-chart'),
+  title: 'My Pie Chart',
+  data: data,
+  type: 'pie',
+  height: 250,
+  colors: ['#7cd6fd', '#743ee2', 'red', 'blue', 'pink', 'grey', 'yellow']
+});
+
+
