@@ -6,6 +6,8 @@ import { createSVG } from './utils/draw';
 import { createDrawAreaComponent } from './utils/draw';
 
 class BaseChart {
+  public options:Iargs;  
+  public optionsData:OptionData;
   public args: Iargs;
   public title: string;
   public subTitle: string;
@@ -20,8 +22,12 @@ class BaseChart {
   public translateX: number;
   public translateY: number;
   constructor(args: Iargs) {
-    this.args = args;
-    this.setup();
+    this.options = args;
+    this.optionsData = args.data;
+    this.args = args; 
+    if (this.options.type!=='pie') {
+      this.setup();
+    }
   }
   setup() {
     this.getValues();
