@@ -3,7 +3,7 @@
  * @author mickle.zy
  */
 import { Iargs } from '../index.d';
-import { BaseChart } from 'src/charts/baseChart';
+import BaseChart from 'src/charts/BaseChart';
 import { getElementContentWidth } from 'src/charts/utils';
 const SVG_NS = 'http://www.w3.org/2000/svg';
 

@@ -1,9 +1,9 @@
 /**
  * @file Axis chart
  */
-import { BaseChart } from './BaseChart';
+import BaseChart from './BaseChart';
 import { Iargs } from '../index.d';
-import { createDrawAreaComponent, makeYLine, makeXLine } from './utils/draw';
+import { makeYLine, makeXLine, createSVG } from './utils/draw';
 import { getStringWidth } from './utils';
 const Y_AXIS_NUMBER = 6;
 
@@ -29,8 +29,14 @@ class AxisChart extends BaseChart {
     this.creteXAxis();
   }
   initAxisContainer() {
-    this.xAxisContainer = createDrawAreaComponent(this.drawArea, 'y axis');
-    this.yAxisContainer = createDrawAreaComponent(this.drawArea, 'x axis');
+    this.xAxisContainer = createSVG('g', {
+      inside: this.drawArea,
+      className: 'y axis',
+    });
+    this.yAxisContainer = createSVG('g', {
+      inside: this.drawArea,
+      className: 'x axis'
+    });
   }
   getAllYValues() {
     let yValues: any[] = [];

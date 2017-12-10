@@ -31,7 +31,7 @@ const data = {
 };
 
 const lineChart = new Chart({
-  parent: 'line',
+  parent: '#line-chart',
   title: 'My Chart',
   data: data,
   type: 'line', // or 'line', 'scatter', 'pie', 'percentage'

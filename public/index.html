@@ -13,10 +13,10 @@
       font-size: 13px;
       font-weight: 300;
     }
-    
+
     .container {
       width: 1000px;
-      margin-left: 150px; 
+      margin-left: 150px;
     }
     .x-axis-line,
     .y-axis-line {
@@ -35,18 +35,18 @@
     .y-axis-line-zero {
       stroke: rgba(27, 31, 35, 0.6);
     }
-    
+
     line {
       position: relative;
       display: block;
     }
-    
+
     .taco-chart .axis,
     .taco-chart .chart-label {
       font-size: 11px;
       fill: #555b51;
     }
-    
+
     .taco-chart .tick .x-value-text {
       text-anchor: middle;
     }
@@ -55,8 +55,7 @@
 
 <body>
   <h1>Taco Demo</h1>
-  <line></line>
-
+  <div id="line-chart" class="container"></div>
   <div id="barchart" class="container"></div>
   <div id="scatter-chart" class="container"></div>
   <div id="pie-chart" class="container"></div>

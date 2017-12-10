@@ -3,7 +3,7 @@
  * 我们可以推断出变量间的相关性。
  */
 import { getElementContentWidth, floatTwo } from "src/charts/utils";
-import { makePath, makeXLine, makeYLine, createSVG } from "src/draw";
+import { makePath, makeXLine, makeYLine, createSVG } from "src/charts/utils/draw";
 
 const DEFAULT_HEIGHT = 240;
 
@@ -168,7 +168,8 @@ class ScatterChart {
     });
     this.xAxis.ticks.forEach((val: number, index: number) => {
       const xPosUnit = (contentWidth - 30) / (this.xAxis.ticks.length - 1)
-      const xLine = makeXLine(contentHeight - 20, contentHeight - 10, val, '', '', index * xPosUnit);
+
+      const xLine = makeXLine(contentHeight - 20, contentHeight - 10, val, index * xPosUnit);
       xAxisGroup.appendChild(xLine);
     });
 
@@ -178,7 +179,7 @@ class ScatterChart {
     });
     this.yAxis.ticks.forEach((val: number, index: number) => {
       const yPosUnit = (contentHeight - 35) / (this.yAxis.ticks.length - 1)
-      const yLine = makeYLine(-7, contentWidth - 25, -10, val, '', '', yPosUnit * (this.yAxis.ticks.length - index - 1))
+      const yLine = makeYLine(-7, contentWidth - 25, -10, val, yPosUnit * (this.yAxis.ticks.length - index - 1));
       yAxisGroup.appendChild(yLine);
     });
 

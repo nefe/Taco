@@ -7,52 +7,39 @@ function __extends(d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 }
 
-function $(expr, con) {
-    return typeof expr === 'string'
-        ? (con || document).querySelector(expr)
-        : expr || null;
-}
-var createSVG = function (tag, o) {
-    var element = document.createElementNS('http://www.w3.org/2000/svg', tag);
-    for (var i in o) {
-        var val = o[i];
-        if (i === 'inside') {
-            $(val).appendChild(element);
-        }
-        else if (i === 'around') {
-            var ref = $(val);
-            ref.parentNode.insertBefore(element, ref);
-            element.appendChild(ref);
-        }
-        else if (i === 'styles') {
-            if (typeof val === 'object') {
-                Object.keys(val).map(function (prop) {
-                    element.style[prop] = val[prop];
-                });
+function createSVG(tag, options) {
+    var element = document.createElementNS("http://www.w3.org/2000/svg", tag);
+    var _loop_1 = function (key) {
+        if (options.hasOwnProperty(key)) {
+            var val_1 = options[key];
+            if (key === 'inside') {
+                val_1.appendChild(element);
             }
-        }
-        else {
-            if (i === 'className') {
-                i = 'class';
-            }
-            if (i === 'innerHTML') {
-                element['textContent'] = val;
+            else if (key === 'styles') {
+                if (typeof val_1 === 'object') {
+                    Object.keys(val_1).map(function (prop) {
+                        element.style[prop] = val_1[prop];
+                    });
+                }
             }
             else {
-                element.setAttribute(i, val);
+                if (key === 'className') {
+                    key = 'class';
+                }
+                else if (key === 'innerHTML') {
+                    element['textContent'] = val_1;
+                }
+                else {
+                    element.setAttribute(key, val_1);
+                }
             }
         }
+    };
+    for (var key in options) {
+        _loop_1(key);
     }
     return element;
-};
-var createDrawAreaComponent = function (parent, className, transform) {
-    if (transform === void 0) { transform = ''; }
-    return createSVG('g', {
-        className: className,
-        inside: parent,
-        transform: transform
-    });
-};
+}
 function makeYLine(startAt, width, textEndAt, point, yPos, darker, lineType) {
     if (darker === void 0) { darker = false; }
     if (lineType === void 0) { lineType = ''; }
@@ -195,8 +182,14 @@ var AxisChart = (function (_super) {
         return _this;
     }
     AxisChart.prototype.initAxisContainer = function () {
-        this.xAxisContainer = createDrawAreaComponent(this.drawArea, 'y axis');
-        this.yAxisContainer = createDrawAreaComponent(this.drawArea, 'x axis');
+        this.xAxisContainer = createSVG('g', {
+            inside: this.drawArea,
+            className: 'y axis',
+        });
+        this.yAxisContainer = createSVG('g', {
+            inside: this.drawArea,
+            className: 'x axis'
+        });
     };
     AxisChart.prototype.getAllYValues = function () {
         var yValues = [];
@@ -270,7 +263,10 @@ var Line = (function (_super) {
         var _this = this;
         this.datasets.map(function (dataset, index) {
             var color = dataset.color || _this.args.colors[index % _this.args.colors.length];
-            var grouSvg = createDrawAreaComponent(_this.drawArea, "path-group path-group-" + index);
+            var grouSvg = createSVG('g', {
+                inside: _this.drawArea,
+                className: "path-group path-group-" + index,
+            });
             var linePath = _this.getLinePath(dataset.values, color);
             grouSvg.appendChild(linePath);
         });
@@ -321,7 +317,7 @@ function floatTwo(number) {
     return parseFloat(number.toFixed(2));
 }
 
-var $$1 = {
+var $ = {
     select: function (expr, con) {
         return typeof expr === "string" ? (con || document).querySelector(expr) : expr || null;
     },
@@ -343,7 +339,7 @@ var $$1 = {
                 key = "class";
             }
             if (key === "inside") {
-                $$1.select(value).appendChild(element);
+                $.select(value).appendChild(element);
             }
             else if (key === "innerHTML") {
                 element['textContent'] = value;
@@ -502,14 +498,14 @@ var BarChart = (function () {
         });
     };
     BarChart.prototype.renderContainer = function () {
-        this.container = $$1.create('div', {
+        this.container = $.create('div', {
             className: 'chart-container',
             innerHTML: "<div class=\"frappe-chart graphics\"></div>",
         });
         this.parent.innerHTML = '';
         this.parent.appendChild(this.container);
         this.chartWrapper = this.container.querySelector('.frappe-chart');
-        this.svg = $$1.createSVG('svg', {
+        this.svg = $.createSVG('svg', {
             className: 'chart',
             inside: this.chartWrapper,
             width: this.width,
@@ -518,25 +514,25 @@ var BarChart = (function () {
     };
     BarChart.prototype.renderAxis = function () {
         var _this = this;
-        this.yAxisGroup = $$1.createSVG('g', {
+        this.yAxisGroup = $.createSVG('g', {
             className: 'y-axis',
             inside: this.svg,
         });
         this.yAxis.unitList.forEach(function (unit, index) {
             var pos = unit.pos, text = unit.text;
-            var yAxisTick = $$1.createSVG('g', {
+            var yAxisTick = $.createSVG('g', {
                 className: 'y-axis-tick',
                 inside: _this.yAxisGroup,
                 transform: "translate(0, " + pos + ")",
             });
-            var yAxisLine = $$1.createSVG('line', {
+            var yAxisLine = $.createSVG('line', {
                 className: text === '0' ? 'y-axis-line y-axis-line-zero' : 'y-axis-line',
                 x1: _this.yAxis.startPos,
                 x2: _this.yAxis.endPos,
                 y1: 0,
                 y2: 0
             });
-            var yAxisText = $$1.createSVG('text', {
+            var yAxisText = $.createSVG('text', {
                 className: 'y-axis-text',
                 x: _this.yAxis.startPos - 6,
                 y: 0,
@@ -546,26 +542,26 @@ var BarChart = (function () {
             yAxisTick.appendChild(yAxisLine);
             yAxisTick.appendChild(yAxisText);
         });
-        this.xAxisGroup = $$1.createSVG('g', {
+        this.xAxisGroup = $.createSVG('g', {
             className: 'x-axis',
             inside: this.svg,
             transform: "translate(0, " + (this.height - this.xAxis.height) + ")",
         });
         this.xAxis.unitList.forEach(function (unit, index) {
             var centerPos = unit.centerPos, text = unit.text;
-            var xAxisTick = $$1.createSVG('g', {
+            var xAxisTick = $.createSVG('g', {
                 className: 'x-axis-tick',
                 inside: _this.xAxisGroup,
                 transform: "translate(" + centerPos + ", 0)",
             });
-            var xAxisLine = $$1.createSVG('line', {
+            var xAxisLine = $.createSVG('line', {
                 className: 'x-axis-line',
                 x1: 0,
                 x2: 0,
                 y1: 0,
                 y2: _this.xAxis.axisHeight,
             });
-            var xAxisText = $$1.createSVG('text', {
+            var xAxisText = $.createSVG('text', {
                 className: 'x-axis-text',
                 innerHTML: text,
                 x: 0,
@@ -580,13 +576,13 @@ var BarChart = (function () {
         var _this = this;
         this.dataPos.forEach(function (data, index) {
             var color = _this.config.colors[index];
-            var dataG = $$1.createSVG('g', {
+            var dataG = $.createSVG('g', {
                 className: 'data-points',
                 inside: _this.svg,
             });
             data.forEach(function (pos) {
                 var value = pos.value, startX = pos.startX, startY = pos.startY, width = pos.width, height = pos.height;
-                var dataRect = $$1.createSVG('rect', {
+                var dataRect = $.createSVG('rect', {
                     className: 'bar',
                     x: startX,
                     y: startY,
@@ -600,92 +596,6 @@ var BarChart = (function () {
     };
     return BarChart;
 }());
-
-function createSVG$1(tag, options) {
-    var element = document.createElementNS("http://www.w3.org/2000/svg", tag);
-    var _loop_1 = function (key) {
-        if (options.hasOwnProperty(key)) {
-            var val_1 = options[key];
-            if (key === 'inside') {
-                val_1.appendChild(element);
-            }
-            else if (key === 'styles') {
-                if (typeof val_1 === 'object') {
-                    Object.keys(val_1).map(function (prop) {
-                        element.style[prop] = val_1[prop];
-                    });
-                }
-            }
-            else {
-                if (key === 'className') {
-                    key = 'class';
-                }
-                else if (key === 'innerHTML') {
-                    element['textContent'] = val_1;
-                }
-                else {
-                    element.setAttribute(key, val_1);
-                }
-            }
-        }
-    };
-    for (var key in options) {
-        _loop_1(key);
-    }
-    return element;
-}
-
-function makeXLine$1(height, textStartAt, point, labelClass, axisLineClass, xPos) {
-    var line = createSVG$1('line', {
-        x1: 0,
-        x2: 0,
-        y1: 0,
-        y2: height,
-        stroke: '#dadada',
-    });
-    var text = createSVG$1('text', {
-        className: labelClass,
-        x: 0,
-        y: textStartAt,
-        dy: '.71em',
-        innerHTML: point,
-        'text-anchor': 'middle',
-        'font-size': '11px'
-    });
-    var xLine = createSVG$1('g', {
-        className: "tick " + axisLineClass,
-        transform: "translate(" + xPos + " 0)"
-    });
-    xLine.appendChild(line);
-    xLine.appendChild(text);
-    return xLine;
-}
-function makeYLine$1(startAt, width, textEndAt, point, labelClass, axisLineClass, yPos) {
-    var line = createSVG$1('line', {
-        x1: startAt,
-        x2: width,
-        y1: 0,
-        y2: 0,
-        stroke: '#dadada',
-    });
-    var text = createSVG$1('text', {
-        className: labelClass,
-        x: textEndAt,
-        y: 0,
-        dy: '.32em',
-        innerHTML: point,
-        'text-anchor': 'end',
-        'font-size': '11px'
-    });
-    var yLine = createSVG$1('g', {
-        className: "tick " + axisLineClass,
-        transform: "translate(0 " + yPos + ")"
-    });
-    yLine.appendChild(line);
-    yLine.appendChild(text);
-    return yLine;
-}
-//# sourceMappingURL=draw.js.map
 
 var DEFAULT_HEIGHT$1 = 240;
 function calcIntervals$1(maxValue, minValue) {
@@ -778,29 +688,29 @@ var ScatterChart = (function () {
         });
         var contentWidth = this.width - 60;
         var contentHeight = this.height - 20;
-        var xAxisGroup = createSVG$1('g', {
+        var xAxisGroup = createSVG('g', {
             className: 'x axis',
             transform: "translate(0, -7)"
         });
         this.xAxis.ticks.forEach(function (val, index) {
             var xPosUnit = (contentWidth - 30) / (_this.xAxis.ticks.length - 1);
-            var xLine = makeXLine$1(contentHeight - 20, contentHeight - 10, val, '', '', index * xPosUnit);
+            var xLine = makeXLine(contentHeight - 20, contentHeight - 10, val, index * xPosUnit);
             xAxisGroup.appendChild(xLine);
         });
-        var yAxisGroup = createSVG$1('g', {
+        var yAxisGroup = createSVG('g', {
             className: 'y axis',
         });
         this.yAxis.ticks.forEach(function (val, index) {
             var yPosUnit = (contentHeight - 35) / (_this.yAxis.ticks.length - 1);
-            var yLine = makeYLine$1(-7, contentWidth - 25, -10, val, '', '', yPosUnit * (_this.yAxis.ticks.length - index - 1));
+            var yLine = makeYLine(-7, contentWidth - 25, -10, val, yPosUnit * (_this.yAxis.ticks.length - index - 1));
             yAxisGroup.appendChild(yLine);
         });
-        var dataPoints = createSVG$1('g', {
+        var dataPoints = createSVG('g', {
             className: 'data-points'
         });
         var pattern = this.config.pattern;
         transformedData.forEach(function (data) {
-            var circle = createSVG$1('circle', {
+            var circle = createSVG('circle', {
                 cx: data[pattern[0] + 'Percent'] * (contentWidth - 30),
                 cy: data[pattern[1] + 'Percent'] * (contentHeight - 35),
                 r: 5,
@@ -809,12 +719,12 @@ var ScatterChart = (function () {
             });
             dataPoints.appendChild(circle);
         });
-        var svg = createSVG$1('svg', {
+        var svg = createSVG('svg', {
             className: 'chart',
             width: this.width,
             height: this.height,
         });
-        var chartContent = createSVG$1('g', {
+        var chartContent = createSVG('g', {
             className: 'scatter-chart',
             transform: 'translate(60, 10)'
         });
@@ -825,61 +735,6 @@ var ScatterChart = (function () {
         this.parent.appendChild(svg);
     };
     return ScatterChart;
-}());
-
-var BaseChart$1 = (function () {
-    function BaseChart(args) {
-        this.options = args;
-        this.optionsData = args.data;
-        this.args = args;
-        if (this.options.type !== 'pie') {
-            this.setup();
-        }
-    }
-    BaseChart.prototype.setup = function () {
-        this.getValues();
-        this.setMargins();
-        this.initContainer();
-        this.initChartArea();
-        this.initDrawArea();
-    };
-    BaseChart.prototype.getValues = function () {
-        var _a = this.args, title = _a.title, subTitle = _a.subTitle, parent = _a.parent, height = _a.height, type = _a.type;
-        this.title = title || '';
-        this.subTitle = subTitle || '';
-        this.parent = typeof parent === 'string' ? document.querySelector(parent) : parent;
-        this.chartWidth = this.parent.getBoundingClientRect().width;
-        this.chartHeight = height;
-        this.type = type;
-    };
-    BaseChart.prototype.initContainer = function () {
-        var containerHtml = "<div className=\"chart-container\">\n      <h6 class=\"title\">" + this.title + "</h6>\n      <h6 class=\"sub-title uppercase\">" + this.subTitle + "</h6>\n      <div class=\"taco-chart graphics\"></div>\n    </div>";
-        this.parent.innerHTML = containerHtml;
-        this.chartWrapper = this.parent.querySelector('.taco-chart');
-    };
-    BaseChart.prototype.setMargins = function () {
-        this.translateX = 60;
-        this.translateY = 10;
-    };
-    BaseChart.prototype.initChartArea = function () {
-        this.svg = createSVG('svg', {
-            className: 'chart',
-            inside: this.chartWrapper,
-            width: this.chartWidth,
-            height: this.chartHeight
-        });
-        this.svgDefs = createSVG('defs', {
-            inside: this.svg,
-        });
-    };
-    BaseChart.prototype.initDrawArea = function () {
-        this.drawArea = createSVG('g', {
-            className: this.type + "-chart",
-            inside: this.svg,
-            transform: "translate(" + this.translateX + ", " + this.translateY + ")"
-        });
-    };
-    return BaseChart;
 }());
 
 var SVG_NS = 'http://www.w3.org/2000/svg';
@@ -967,7 +822,7 @@ var Pie = (function (_super) {
         this.chartDom.appendChild(path);
     };
     return Pie;
-}(BaseChart$1));
+}(BaseChart));
 
 var data = {
     labels: [
@@ -996,7 +851,7 @@ var data = {
     ]
 };
 var lineChart = new Chart({
-    parent: 'line',
+    parent: '#line-chart',
     title: 'My Chart',
     data: data,
     type: 'line',

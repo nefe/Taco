@@ -1,54 +1,60 @@
-function $(expr: string, con?: HTMLElement) {
-  return typeof expr === 'string'
-    ? (con || document).querySelector(expr)
-    : expr || null;
-}
+/**
+ * 创建一个 SVG 元素
+ * @param tag 标签名
+ * @param o 对象
+ */
+export function createSVG(tag: string, options: any) {
+  const element = document.createElementNS("http://www.w3.org/2000/svg", tag);
 
-export const createSVG = (tag: string, o: any) => {
-  var element = document.createElementNS('http://www.w3.org/2000/svg', tag);
-
-  for (var i in o) {
-    var val = o[i];
-
-    if (i === 'inside') {
-      $(val).appendChild(element);
-    } else if (i === 'around') {
-      var ref = $(val);
-      ref.parentNode.insertBefore(element, ref);
-      element.appendChild(ref);
-    } else if (i === 'styles') {
-      if (typeof val === 'object') {
-        Object.keys(val).map((prop: any) => {
-          element.style[prop] = val[prop];
-        });
-      }
-    } else {
-      if (i === 'className') {
-        i = 'class';
-      }
-      if (i === 'innerHTML') {
-        element['textContent'] = val;
+  for (let key in options) {
+    if (options.hasOwnProperty(key)) {
+      const val = options[key];
+      if (key === 'inside') {
+        val.appendChild(element);
+      } else if (key === 'styles') {
+        if (typeof val === 'object') {
+          Object.keys(val).map((prop: string) => {
+            (element.style as any)[prop] = val[prop];
+          });
+        }
       } else {
-        element.setAttribute(i, val);
+        if (key === 'className') {
+          key = 'class'; // 兼容 react 中的 className
+        } else if (key === 'innerHTML') {
+          element['textContent'] = val;
+        } else {
+          // 设置属性，最重要的一行
+          element.setAttribute(key, val);
+        }
       }
     }
   }
 
   return element;
-};
+}
 
-export const createDrawAreaComponent = (
-  parent: SVGElement,
-  className: string,
-  transform = ''
-) => {
-  return createSVG('g', {
-    className: className,
-    inside: parent,
-    transform: transform
-  });
-};
+// export const createDrawAreaComponent = (
+//   parent: SVGElement,
+//   className: string,
+//   transform = ''
+// ) => {
+//   return createSVG('g', {
+//     className: className,
+//     inside: parent,
+//     transform: transform
+//   });
+// };
 
+/**
+ * 绘制一条 Y 轴的线
+ * @param startAt 左侧留白宽度
+ * @param width 高度
+ * @param textEndAt 文字的X坐标
+ * @param point 坐标轴文字内容
+ * @param yPos 线的Y坐标
+ * @param darker
+ * @param lineType
+ */
 export function makeYLine(
   startAt: number,
   width: number,
@@ -71,13 +77,13 @@ export function makeYLine(
     className: 'y-value-text',
     x: textEndAt,
     y: 0,
-    dy: '.32em',
+    dy: '.32em', // 文字向下稍微偏移
     innerHTML: point + ''
   });
 
   let yLine = createSVG('g', {
     className: `tick y-axis-label`,
-    transform: `translate(0, ${yPos})`,
+    transform: `translate(0, ${yPos})`, // 平移
     'stroke-opacity': 1
   });
 
@@ -91,10 +97,17 @@ export function makeYLine(
   return yLine;
 }
 
+/**
+ * 绘制一条 X 轴的线
+ * @param height 高度
+ * @param textStartAt 文字的Y坐标
+ * @param point 坐标轴文字内容
+ * @param xPos 线的X坐标
+ */
 export function makeXLine(
   height: number,
   textStartAt: number,
-  point: string,
+  point: string | number,
   xPos: number
 ) {
   let line = createSVG('line', {
@@ -109,7 +122,7 @@ export function makeXLine(
     className: 'x-value-text',
     x: 0,
     y: textStartAt,
-    dy: '.71em',
+    dy: '.71em', // 文字向下稍微偏移
     innerHTML: point
   });
 
@@ -124,8 +137,11 @@ export function makeXLine(
   return xLine;
 }
 
+/**
+ * 创建 path
+ */
 export function makePath(
-  pathStr: any[],
+  pathStr: string,
   className = '',
   stroke = 'none',
   fill = 'none'

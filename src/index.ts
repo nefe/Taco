@@ -1,4 +1,4 @@
-import { Line } from './charts/Line';
+import Line from './charts/Line';
 import Bar from './charts/Bar';
 import { Iargs } from './index.d';
 

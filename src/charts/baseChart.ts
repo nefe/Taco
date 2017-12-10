@@ -3,11 +3,10 @@
  */
 import { Iargs } from '../index.d';
 import { createSVG } from './utils/draw';
-import { createDrawAreaComponent } from './utils/draw';
 
 class BaseChart {
-  public options:Iargs;  
-  public optionsData:OptionData;
+  public options:Iargs;
+  public optionsData: any;
   public args: Iargs;
   public title: string;
   public subTitle: string;
@@ -24,7 +23,7 @@ class BaseChart {
   constructor(args: Iargs) {
     this.options = args;
     this.optionsData = args.data;
-    this.args = args; 
+    this.args = args;
     if (this.options.type!=='pie') {
       this.setup();
     }
@@ -79,4 +78,4 @@ class BaseChart {
   }
 }
 
-export { BaseChart };
+export default BaseChart;

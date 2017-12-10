@@ -3,9 +3,9 @@
  */
 import { AxisChart } from './AxisChart';
 import { Iargs } from '../index.d';
-import { createDrawAreaComponent, makePath } from './utils/draw';
+import { createSVG, makePath } from './utils/draw';
 
-class Line extends AxisChart {
+export default class Line extends AxisChart {
   constructor(args: Iargs) {
     super(args);
     this.init();
@@ -17,7 +17,10 @@ class Line extends AxisChart {
   initPathGroup() {
     this.datasets.map((dataset: any, index: number) => {
       const color = dataset.color || this.args.colors[index % this.args.colors.length];
-      const grouSvg = createDrawAreaComponent(this.drawArea, `path-group path-group-${index}`);
+      const grouSvg = createSVG('g', {
+        inside: this.drawArea,
+        className: `path-group path-group-${index}`,
+      });
       const linePath = this.getLinePath(dataset.values, color);
       grouSvg.appendChild(linePath);
     });
@@ -41,5 +44,3 @@ class Line extends AxisChart {
     return makePath("M" + pointsStr, 'line-graph-path', color);
   }
 }
-
-export { Line };
