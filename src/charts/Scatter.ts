@@ -138,9 +138,6 @@ class ScatterChart {
    */
   render() {
     console.log('rendering');
-    console.log('xAxis', this.xAxis);
-    console.log('yAxis', this.yAxis);
-    console.log(this.data);
 
     // 转换数据为易处理的格式
     const transformedData: any[] = [];
@@ -151,7 +148,6 @@ class ScatterChart {
         const max = Math.max(...o.values);
         const min = Math.min(...o.values);
         const percent = max > min ? (entry - min) / (max - min) : 0;
-        console.log('max min', min, max, entry, percent);
 
         // 得到数据的比例
         transformedData[index][o.title + 'Percent'] = percent;
