@@ -1,7 +1,7 @@
 import Chart from './index';
 import BarChart from './charts/Bar';
 import ScatterChart from './charts/Scatter';
-import {Pie} from 'src/charts/Pie';
+import { Pie } from 'src/charts/Pie';
 
 const data = {
   labels: [
@@ -44,7 +44,6 @@ const chart = new BarChart({
   colors: ['#7cd6fd', '#743ee2', '#5e64ff'],
   data,
 });
-
 
 const scatterData = {
   datasets: [

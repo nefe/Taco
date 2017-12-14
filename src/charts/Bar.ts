@@ -1,9 +1,10 @@
-import { getElementContentWidth, floatTwo, $ } from "src/charts/utils";
+import { getElementContentWidth, floatTwo, $, offset } from "src/charts/utils";
+import Tooltip from './Tooltip';
 
 /**
  * 分层的解耦思想
  * 数据层 (可以更换算法) -> 渲染层 (可以更换渲染方式)
- * 好处，方便兼容与替换，方便测试
+ * 好处，方便兼容与替换，方便测试`
  * 坏处，自制驱动引擎？动画
  */
 
@@ -14,7 +15,7 @@ const DEFAULT_HEIGHT = 240;
  * 根据最大最小值确定分度，原来代码这部分做得太啰嗦
  * 问题抽象，在已知最大值与最小值的情况下，不限制间隔与数量的情况下，如何让坐标轴刻度尽可能美观
  * G2 实现也很啰嗦 https://github.com/antvis/g2/blob/724872cee56d7e731b1d945444b7b10d4d0ef2e8/src/scale/auto/number.js
- * 想到一个 简单方法，最大值 - 最小值差值 / 4 向上取整数量级
+ * 想到一个 简单方法，最大值 - 最小值差值 / 6 向上取整数量级
  * @param maxValue
  * @param minValue
  */
@@ -131,6 +132,7 @@ interface DataPos {
 }
 
 class BarChart {
+  tooltip: Tooltip;
   xAxisGroup: SVGElement;
   yAxisGroup: SVGElement;
   svg: SVGElement;
@@ -151,9 +153,14 @@ class BarChart {
 
   constructor(config: BarChartConfig) {
     this.config = config;
-    this.calculate();
     this.isExist = true;
+    this.calculate();
     this.render();
+
+    window.addEventListener('resize', () => {
+      this.calculate();
+      this.render();
+    });
   }
 
   /**
@@ -172,6 +179,7 @@ class BarChart {
     this.renderContainer();
     this.renderAxis();
     this.renderValue();
+    this.renderTooltip();
   }
 
   /**
@@ -182,12 +190,53 @@ class BarChart {
   }
 
   /**
+   * 渲染 Tooltip
+   */
+  renderTooltip() {
+    this.tooltip = new Tooltip({
+      parent: this.chartWrapper,
+    });
+    this.bindTooltip();
+  }
+
+  /**
+   * 绑定 ToolTip，整个 x 轴区域
+   */
+  bindTooltip() {
+    this.chartWrapper.addEventListener('mousemove', (event: MouseEvent) => {
+      const { left, top } = offset(this.chartWrapper);
+      const { pageX, pageY } = event;
+
+      const padding = this.xAxis.height;
+      const realY = pageY - top;
+      const realX = pageX - left;
+      if (realY < this.height - padding && realX >= this.xAxis.padding && realX < this.width - this.xAxis.padding) {
+        const barIndex = Math.floor((realX - this.xAxis.padding) / this.xAxis.unitWidth);
+        const xValue = this.data.labels[barIndex];
+        const yValue = this.data.datasets.map((dataset) => {
+          return {
+            title: dataset.title,
+            value: dataset.values[barIndex],
+          };
+        });
+        const startX = this.xAxis.unitList[barIndex].centerPos;
+        const startY = this.dataPos.reduce((pre, pos) => {
+          if (pre > pos[barIndex].startY) {
+            return pos[barIndex].startY;
+          }
+          return pre;
+        }, Number.MAX_SAFE_INTEGER) - 4;
+        this.tooltip.setValues(xValue, yValue, { x: startX, y: startY });
+      } else {
+        this.tooltip.hideTip();
+      }
+    });
+  }
+
+  /**
    * 设置图表大小，可抽象为 Base
    */
   getSize() {
-    // 当前图表已存在，此部不需要再做
-    if (this.isExist) return;
-
     if (typeof this.config.parent === 'string') {
       this.parent = document.querySelector(this.config.parent);
     } else {
@@ -292,7 +341,7 @@ class BarChart {
       className: 'chart-container',
       innerHTML: `<div class="frappe-chart graphics"></div>`,
     });
-    this.parent.innerHTML = '';
+    this.clearContainer();
     this.parent.appendChild(this.container);
 
     this.chartWrapper = this.container.querySelector('.frappe-chart');
@@ -303,6 +352,10 @@ class BarChart {
       width: this.width,
       height: this.height,
     });
+  }
+
+  clearContainer() {
+    this.parent.innerHTML = '';
   }
 
   /** 渲染坐标 */

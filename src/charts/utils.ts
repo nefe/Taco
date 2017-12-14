@@ -31,13 +31,16 @@ export function getStringWidth(string: string, charWidth: number) {
  */
 export const $ = {
 	select: (expr: string | Element, con?: Element): Element => {
-		return typeof expr === "string"? (con || document).querySelector(expr) : expr || null;
+		return typeof expr === "string" ? (con || document).querySelector(expr) : expr || null;
 	},
 	// <T extends keyof HTMLElement>
 	create: (tag: string, options: any): HTMLElement => {
 		const element = document.createElement(tag);
 		for (var key in options) {
 			const value = options[key];
+			if (key === 'inside') {
+				$.select(value).appendChild(element);
+			}
 			if (key in element) {
 				(element as any)[key] = value;
 			}
@@ -62,4 +65,16 @@ export const $ = {
 		}
 		return element;
 	}
+}
+
+/**
+ * 获取 element 在整个页面中的 top 与 left
+ * @param element 
+ */
+export function offset(element: HTMLElement) {
+	let rect = element.getBoundingClientRect();
+	return {
+		top: rect.top + (document.documentElement.scrollTop || document.body.scrollTop),
+		left: rect.left + (document.documentElement.scrollLeft || document.body.scrollLeft)
+	};
 }
