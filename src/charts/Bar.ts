@@ -1,4 +1,5 @@
-import { getElementContentWidth, floatTwo, $ } from "src/charts/utils";
+import { getElementContentWidth, floatTwo, $, offset, creatSVGAnimate } from "src/charts/utils";
+import Tooltip from './Tooltip';
 
 /**
  * 分层的解耦思想
@@ -8,13 +9,13 @@ import { getElementContentWidth, floatTwo, $ } from "src/charts/utils";
  */
 
 /** 图默认高度 */
-const DEFAULT_HEIGHT = 240; 
+const DEFAULT_HEIGHT = 240;
 
 /**
  * 根据最大最小值确定分度，原来代码这部分做得太啰嗦
  * 问题抽象，在已知最大值与最小值的情况下，不限制间隔与数量的情况下，如何让坐标轴刻度尽可能美观
  * G2 实现也很啰嗦 https://github.com/antvis/g2/blob/724872cee56d7e731b1d945444b7b10d4d0ef2e8/src/scale/auto/number.js
- * 想到一个 简单方法，最大值 - 最小值差值 / 4 向上取整数量级
+ * 想到一个 简单方法，最大值 - 最小值差值 / 6 向上取整数量级
  * @param maxValue
  * @param minValue
  */
@@ -122,15 +123,21 @@ class YAxis {
 
 interface DataPos {
   value: number;
-  startX: number;
-  startY: number;
+  x: number;
+  y: number;
   width: number;
   height: number;
-  /** 新-老的差值，y 轴方向上 */
-  diff?: number;
+  oldValue?: {
+    // x: number;
+    y: number;
+    // width: number;
+    height: number;
+  };
 }
 
 class BarChart {
+  oldDataPos: DataPos[][];
+  tooltip: Tooltip;
   xAxisGroup: SVGElement;
   yAxisGroup: SVGElement;
   svg: SVGElement;
@@ -139,8 +146,6 @@ class BarChart {
   data: Data;
   config: BarChartConfig;
   parent: Element;
-  /** 是否已存在值，已存在就要触发 animation */
-  isExist: boolean;
   dataPos: DataPos[][];
 
   width: number;
@@ -152,8 +157,12 @@ class BarChart {
   constructor(config: BarChartConfig) {
     this.config = config;
     this.calculate();
-    this.isExist = true;
     this.render();
+
+    window.addEventListener('resize', () => {
+      this.calculate();
+      this.render();
+    });
   }
 
   /**
@@ -172,22 +181,66 @@ class BarChart {
     this.renderContainer();
     this.renderAxis();
     this.renderValue();
+    this.renderTooltip();
   }
 
   /**
    * 更新模块
    */
   update(data: Data) {
-    // this.calculate();
+    this.config.data = data;
+    this.calculate();
+    this.render();
+  }
+
+  /**
+   * 渲染 Tooltip
+   */
+  renderTooltip() {
+    this.tooltip = new Tooltip({
+      parent: this.chartWrapper,
+    });
+    this.bindTooltip();
+  }
+
+  /**
+   * 绑定 ToolTip，整个 x 轴区域
+   */
+  bindTooltip() {
+    this.chartWrapper.addEventListener('mousemove', (event: MouseEvent) => {
+      const { left, top } = offset(this.chartWrapper);
+      const { pageX, pageY } = event;
+
+      const padding = this.xAxis.height;
+      const realY = pageY - top;
+      const realX = pageX - left;
+      if (realY < this.height - padding && realX >= this.xAxis.padding && realX < this.width - this.xAxis.padding) {
+        const barIndex = Math.floor((realX - this.xAxis.padding) / this.xAxis.unitWidth);
+        const xValue = this.data.labels[barIndex];
+        const yValue = this.data.datasets.map((dataset) => {
+          return {
+            title: dataset.title,
+            value: dataset.values[barIndex],
+          };
+        });
+        const x = this.xAxis.unitList[barIndex].centerPos;
+        const y = this.dataPos.reduce((pre, pos) => {
+          if (pre > pos[barIndex].y) {
+            return pos[barIndex].y;
+          }
+          return pre;
+        }, Number.MAX_SAFE_INTEGER) - 4;
+        this.tooltip.setValues(xValue, yValue, { x, y });
+      } else {
+        this.tooltip.hideTip();
+      }
+    });
   }
 
   /**
    * 设置图表大小，可抽象为 Base
    */
   getSize() {
-    // 当前图表已存在，此部不需要再做
-    if (this.isExist) return;
-
     if (typeof this.config.parent === 'string') {
       this.parent = document.querySelector(this.config.parent);
     } else {
@@ -253,37 +306,54 @@ class BarChart {
       return {
         pos: padding + heightInterval * index,
         text: String(tick),
-        // diffPos:
       };
-    });    
+    }); 
   }
 
   /** 设置各个值在 x 轴与 y 轴的真实位置 */
   getValue() {
+    // 求解动画数据，没有的用上一个最后补齐，上一个没有用 0 补齐
+    this.oldDataPos = (this.dataPos || []).map(data => data);
+    const defaultOldValue = {
+      // x, width 与当前一致
+      /** 有零线，没有零线设为最低线 */
+      y: this.yAxis.zeroPos !== undefined ?
+        this.yAxis.zeroPos : this.yAxis.unitList[this.yAxis.unitList.length - 1].pos,
+      height: 0,
+    };
+
     this.dataPos = this.data.datasets.map((dataset, index) => {
       const { values } = dataset;
+      const isExistIndex = this.oldDataPos.length > index;
       return values.map((value, i) => {
         const { barWidth, startBarPos } = this.xAxis.unitList[i];
-        const startX = startBarPos + barWidth * index;
+        const x = startBarPos + barWidth * index;
         const height = Math.abs(value) * this.yAxis.valueInterval;
+        const isExistI = isExistIndex && this.oldDataPos[index].length > i;
+        const oldValue = isExistIndex && isExistI ? this.oldDataPos[index][i] : defaultOldValue;
+
         if (value < 0) {
           return {
-            value: value,
-            startX,
-            startY: this.yAxis.zeroPos,
+            value,
+            x,
+            y: this.yAxis.zeroPos,
             width: barWidth,
             height,
+            oldValue,
           };
         }
         return {
-          value: value,
-          startX,
-          startY: this.yAxis.zeroPos - height,
+          value,
+          x,
+          y: this.yAxis.zeroPos - height,
           width: barWidth,
           height,
+          oldValue,
         }
       });
     });
+
+    console.log(this.dataPos);
   }
 
   /** 渲染外容器 */
@@ -292,7 +362,7 @@ class BarChart {
       className: 'chart-container',
       innerHTML: `<div class="frappe-chart graphics"></div>`,
     });
-    this.parent.innerHTML = '';
+    this.clearContainer();
     this.parent.appendChild(this.container);
 
     this.chartWrapper = this.container.querySelector('.frappe-chart');
@@ -303,6 +373,10 @@ class BarChart {
       width: this.width,
       height: this.height,
     });
+  }
+
+  clearContainer() {
+    this.parent.innerHTML = '';
   }
 
   /** 渲染坐标 */
@@ -384,18 +458,40 @@ class BarChart {
         className: 'data-points',
         inside: this.svg,
       });
+
       data.forEach(pos => {
-        const { value, startX, startY, width, height } = pos;
+        const { value, x, y, width, height, oldValue } = pos;
         const dataRect = $.createSVG('rect', {
           className: 'bar',
-          x: startX,
-          y: startY,
+          x,
+          y,
+          width,
+          height,
+          fill: color,
+        });
+        const dataAniamteRect = $.createSVG('rect', {
+          className: 'bar',
+          x,
+          y,
           width,
           height,
           fill: color,
         });
 
         dataG.appendChild(dataRect);
+
+        creatSVGAnimate({
+          parent: dataRect,
+          dur: 1000,
+          new: {
+            y: pos.y,
+            height: pos.height,
+          },
+          old: {
+            y: oldValue.y,
+            height: oldValue.height,
+          }
+        });
       });
     });
   }

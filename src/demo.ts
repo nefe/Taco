@@ -1,7 +1,10 @@
 import Chart from './index';
 import BarChart from './charts/Bar';
 import ScatterChart from './charts/Scatter';
-import {Pie} from 'src/charts/Pie';
+import { Pie } from 'src/charts/Pie';
+
+import './scss/normalize.scss';
+import './scss/charts.scss';
 
 const data = {
   labels: [
@@ -45,6 +48,45 @@ const chart = new BarChart({
   data,
 });
 
+function rnd(start = -100, end = 100){
+  return Math.floor(Math.random() * (end - start) + start);
+}
+
+function getRandomValues() {
+  return [1, 2, 3, 4, 5, 6, 7, 8, 9].map(() => {
+    return rnd();
+  });
+}
+
+setTimeout(() => {
+  chart.update({
+    labels: [
+      '12am-3am',
+      '3am-6pm',
+      '6am-9am',
+      '9am-12am',
+      '12pm-3pm',
+      '3pm-6pm',
+      '6pm-9pm',
+      '9am-12am',
+      '14am-16am'
+    ],
+    datasets: [
+      {
+        title: 'Some Data',
+        values: getRandomValues(),
+      },
+      {
+        title: 'Another Set',
+        values: getRandomValues(),
+      },
+      {
+        title: "Yet Another",
+        values: getRandomValues(),
+      }
+    ]
+  });
+}, 1000);
 
 const scatterData = {
   datasets: [

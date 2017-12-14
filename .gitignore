@@ -4,3 +4,4 @@ package-lock.json
 *.log
 public/bundle.js
 public/bundle.js.map
+public/bundle.css
