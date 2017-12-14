@@ -22,10 +22,9 @@ export function createSVG(tag: string, options: any) {
           key = 'class'; // 兼容 react 中的 className
         } else if (key === 'innerHTML') {
           element['textContent'] = val;
-        } else {
-          // 设置属性，最重要的一行
-          element.setAttribute(key, val);
         }
+        // 设置属性，最重要的一行
+        element.setAttribute(key, val);
       }
     }
   }
@@ -107,7 +106,7 @@ export function makeXLine(
   });
 
   let text = createSVG('text', {
-    className: 'x-value-text',
+    className: 'x-axis-text',
     x: 0,
     y: textStartAt,
     dy: '.71em', // 文字向下稍微偏移
