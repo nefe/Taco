@@ -17,13 +17,15 @@ class AxisChart extends BaseChart {
   public xPositons: number[] = [];
   public yPositions: number[] = [];
   public yValues: number[] = [];
+  public xInterval: number;
+  public yInterval: number;
   constructor(args: Iargs) {
     super(args);
     const { data } = args;
     this.labels = data.labels;
     this.datasets = data.datasets;
     this.drawHeight = this.svg.getBoundingClientRect().height - (this.translateY * 2);
-    this.drawWidth = this.svg.getBoundingClientRect().width - (this.translateX * 2);
+    this.drawWidth = this.svg.getBoundingClientRect().width - (this.translateX);
     this.initAxisContainer();
     this.createYAxis();
     this.creteXAxis();
@@ -31,11 +33,11 @@ class AxisChart extends BaseChart {
   initAxisContainer() {
     this.xAxisContainer = createSVG('g', {
       inside: this.drawArea,
-      className: 'y axis',
+      className: 'x axis',
     });
     this.yAxisContainer = createSVG('g', {
       inside: this.drawArea,
-      className: 'x axis'
+      className: 'y axis'
     });
   }
   getAllYValues() {
@@ -63,10 +65,11 @@ class AxisChart extends BaseChart {
   }
   drawYAxis(value: number, index: number, yPos: number) {
     const startAt = 6;
-    const interval = this.drawWidth / (this.labels.length - 1);
+    this.yInterval = this.drawWidth / (this.labels.length - 1);
     // TODO: 去除 magic number
-    const width = this.chartWidth - interval + 16;
     const textEndAt = -30;
+    // 减去文字部分, 减去左边间距
+    const width = this.chartWidth - this.translateX - 15;
     const yLine = makeYLine(startAt, width, textEndAt, value, yPos);
     this.yAxisContainer.appendChild(yLine);
   }
@@ -81,9 +84,10 @@ class AxisChart extends BaseChart {
     });
   }
   creteXAxis() {
-    const interval = this.drawWidth / (this.labels.length - 1);
+    console.log(this.drawWidth, 'this.drawWidth');
+    this.xInterval = (this.drawWidth + 60) / (this.labels.length);
     this.labels.forEach((label, index) => {
-      const xPos = interval * (index) + 15;
+      const xPos = this.xInterval * (index) + 15;
       this.xPositons.push(xPos);
       this.dragXAxis(label, xPos);
     });

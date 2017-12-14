@@ -4,6 +4,7 @@
 import { AxisChart } from './AxisChart';
 import { Iargs } from '../index.d';
 import { createSVG, makePath } from './utils/draw';
+import { ToolTip } from './utils/Tooltip';
 
 export default class Line extends AxisChart {
   constructor(args: Iargs) {
@@ -12,6 +13,17 @@ export default class Line extends AxisChart {
   }
   init() {
     this.initPathGroup();
+    this.tooltip = new ToolTip({
+      parent: this.parent,
+      xPositons: this.xPositons,
+      drawArea: this.drawArea,
+      xInterval: this.xInterval,
+      labels: this.labels,
+      datasets: this.datasets,
+      getYPosition: this.getYPosition,
+      translateX: this.translateX,
+      colors: this.options.colors
+    });
   }
   initPathGroup() {
     this.datasets.map((dataset: any, index: number) => {
@@ -24,7 +36,7 @@ export default class Line extends AxisChart {
       grouSvg.appendChild(linePath);
     });
   }
-  getYPosition(values: number[]) {
+  getYPosition = (values: number[]) => {
     const maxYValue = Math.max(...this.yValues);
     const minYValue = Math.min(...this.yValues);
     const maxYPosition = Math.max(...this.yPositions);
