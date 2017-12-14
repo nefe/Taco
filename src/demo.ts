@@ -3,6 +3,9 @@ import BarChart from './charts/Bar';
 import ScatterChart from './charts/Scatter';
 import { Pie } from 'src/charts/Pie';
 
+import './scss/normalize.scss';
+import './scss/charts.scss';
+
 const data = {
   labels: [
     '12am-3am',

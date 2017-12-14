@@ -6,10 +6,29 @@ body {
 }
 
 .container {
-  width: 100%;
-  .frappe-chart {
-    position: relative;
-  }
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.tital {
+  text-align: center;
+  padding: 30px 0;
+}
+
+.tital .title {
+  font-family: 'Gloria Hallelujah', cursive;
+  font-size: 42px;
+  margin: 10px;
+}
+
+.tital .info {
+  color: #999;
+  font-size: 18px;
+}
+
+.footer {
+  text-align: center;
+  padding: 60px 0 10px;
 }
 
 .x-axis-line,
@@ -46,6 +65,10 @@ line {
 
 .taco-chart .tick .x-value-text {
   text-anchor: middle;
+}
+
+#pie-chart {
+  text-align: center;
 }
 
 .graph-svg-tip {
