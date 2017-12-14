@@ -1,15 +1,15 @@
-import { getElementContentWidth, floatTwo, $, offset } from "src/charts/utils";
+import { getElementContentWidth, floatTwo, $, offset, creatSVGAnimate } from "src/charts/utils";
 import Tooltip from './Tooltip';
 
 /**
  * 分层的解耦思想
  * 数据层 (可以更换算法) -> 渲染层 (可以更换渲染方式)
- * 好处，方便兼容与替换，方便测试`
+ * 好处，方便兼容与替换，方便测试
  * 坏处，自制驱动引擎？动画
  */
 
 /** 图默认高度 */
-const DEFAULT_HEIGHT = 240; 
+const DEFAULT_HEIGHT = 240;
 
 /**
  * 根据最大最小值确定分度，原来代码这部分做得太啰嗦
@@ -123,15 +123,20 @@ class YAxis {
 
 interface DataPos {
   value: number;
-  startX: number;
-  startY: number;
+  x: number;
+  y: number;
   width: number;
   height: number;
-  /** 新-老的差值，y 轴方向上 */
-  diff?: number;
+  oldValue?: {
+    // x: number;
+    y: number;
+    // width: number;
+    height: number;
+  };
 }
 
 class BarChart {
+  oldDataPos: DataPos[][];
   tooltip: Tooltip;
   xAxisGroup: SVGElement;
   yAxisGroup: SVGElement;
@@ -141,8 +146,6 @@ class BarChart {
   data: Data;
   config: BarChartConfig;
   parent: Element;
-  /** 是否已存在值，已存在就要触发 animation */
-  isExist: boolean;
   dataPos: DataPos[][];
 
   width: number;
@@ -153,7 +156,6 @@ class BarChart {
 
   constructor(config: BarChartConfig) {
     this.config = config;
-    this.isExist = true;
     this.calculate();
     this.render();
 
@@ -186,7 +188,9 @@ class BarChart {
    * 更新模块
    */
   update(data: Data) {
-    // this.calculate();
+    this.config.data = data;
+    this.calculate();
+    this.render();
   }
 
   /**
@@ -219,14 +223,14 @@ class BarChart {
             value: dataset.values[barIndex],
           };
         });
-        const startX = this.xAxis.unitList[barIndex].centerPos;
-        const startY = this.dataPos.reduce((pre, pos) => {
-          if (pre > pos[barIndex].startY) {
-            return pos[barIndex].startY;
+        const x = this.xAxis.unitList[barIndex].centerPos;
+        const y = this.dataPos.reduce((pre, pos) => {
+          if (pre > pos[barIndex].y) {
+            return pos[barIndex].y;
           }
           return pre;
         }, Number.MAX_SAFE_INTEGER) - 4;
-        this.tooltip.setValues(xValue, yValue, { x: startX, y: startY });
+        this.tooltip.setValues(xValue, yValue, { x, y });
       } else {
         this.tooltip.hideTip();
       }
@@ -302,37 +306,54 @@ class BarChart {
       return {
         pos: padding + heightInterval * index,
         text: String(tick),
-        // diffPos:
       };
-    });    
+    }); 
   }
 
   /** 设置各个值在 x 轴与 y 轴的真实位置 */
   getValue() {
+    // 求解动画数据，没有的用上一个最后补齐，上一个没有用 0 补齐
+    this.oldDataPos = (this.dataPos || []).map(data => data);
+    const defaultOldValue = {
+      // x, width 与当前一致
+      /** 有零线，没有零线设为最低线 */
+      y: this.yAxis.zeroPos !== undefined ?
+        this.yAxis.zeroPos : this.yAxis.unitList[this.yAxis.unitList.length - 1].pos,
+      height: 0,
+    };
+
     this.dataPos = this.data.datasets.map((dataset, index) => {
       const { values } = dataset;
+      const isExistIndex = this.oldDataPos.length > index;
       return values.map((value, i) => {
         const { barWidth, startBarPos } = this.xAxis.unitList[i];
-        const startX = startBarPos + barWidth * index;
+        const x = startBarPos + barWidth * index;
         const height = Math.abs(value) * this.yAxis.valueInterval;
+        const isExistI = isExistIndex && this.oldDataPos[index].length > i;
+        const oldValue = isExistIndex && isExistI ? this.oldDataPos[index][i] : defaultOldValue;
+
         if (value < 0) {
           return {
-            value: value,
-            startX,
-            startY: this.yAxis.zeroPos,
+            value,
+            x,
+            y: this.yAxis.zeroPos,
             width: barWidth,
             height,
+            oldValue,
           };
         }
         return {
-          value: value,
-          startX,
-          startY: this.yAxis.zeroPos - height,
+          value,
+          x,
+          y: this.yAxis.zeroPos - height,
           width: barWidth,
           height,
+          oldValue,
         }
       });
     });
+
+    console.log(this.dataPos);
   }
 
   /** 渲染外容器 */
@@ -437,18 +458,40 @@ class BarChart {
         className: 'data-points',
         inside: this.svg,
       });
+
       data.forEach(pos => {
-        const { value, startX, startY, width, height } = pos;
+        const { value, x, y, width, height, oldValue } = pos;
         const dataRect = $.createSVG('rect', {
           className: 'bar',
-          x: startX,
-          y: startY,
+          x,
+          y,
+          width,
+          height,
+          fill: color,
+        });
+        const dataAniamteRect = $.createSVG('rect', {
+          className: 'bar',
+          x,
+          y,
           width,
           height,
           fill: color,
         });
 
         dataG.appendChild(dataRect);
+
+        creatSVGAnimate({
+          parent: dataRect,
+          dur: 1000,
+          new: {
+            y: pos.y,
+            height: pos.height,
+          },
+          old: {
+            y: oldValue.y,
+            height: oldValue.height,
+          }
+        });
       });
     });
   }
