@@ -4,7 +4,7 @@
  * @param o 对象
  */
 export function createSVG(tag: string, options: any) {
-  const element = document.createElementNS("http://www.w3.org/2000/svg", tag);
+  const element = document.createElementNS('http://www.w3.org/2000/svg', tag);
 
   for (let key in options) {
     if (options.hasOwnProperty(key)) {
@@ -32,18 +32,6 @@ export function createSVG(tag: string, options: any) {
 
   return element;
 }
-
-// export const createDrawAreaComponent = (
-//   parent: SVGElement,
-//   className: string,
-//   transform = ''
-// ) => {
-//   return createSVG('g', {
-//     className: className,
-//     inside: parent,
-//     transform: transform
-//   });
-// };
 
 /**
  * 绘制一条 Y 轴的线

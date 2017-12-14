@@ -12,7 +12,6 @@ export default class Line extends AxisChart {
   }
   init() {
     this.initPathGroup();
-    console.log('line');
   }
   initPathGroup() {
     this.datasets.map((dataset: any, index: number) => {
