@@ -1,0 +1,132 @@
+body {
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  color: #333;
+  font-size: 13px;
+  font-weight: 300;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.tital {
+  text-align: center;
+  padding: 30px 0;
+}
+
+.tital .title {
+  font-family: 'Gloria Hallelujah', cursive;
+  font-size: 42px;
+  margin: 10px;
+}
+
+.tital .info {
+  color: #999;
+  font-size: 18px;
+}
+
+.footer {
+  text-align: center;
+  padding: 60px 0 10px;
+}
+
+.x-axis-line,
+.y-axis-line {
+  stroke: #dadada;
+}
+
+.x-axis-text {
+  text-anchor: middle;
+  font-size: 11px;
+  fill: #555b51;
+}
+
+.y-axis-text {
+  font-size: 11px;
+  fill: #555b51;
+  text-anchor: end;
+}
+
+.y-axis-line-zero {
+  stroke: rgba(27, 31, 35, 0.6);
+}
+
+line {
+  position: relative;
+  display: block;
+}
+
+.taco-chart .axis,
+.taco-chart .chart-label {
+  font-size: 11px;
+  fill: #555b51;
+}
+
+.taco-chart .tick .x-value-text {
+  text-anchor: middle;
+}
+
+#pie-chart {
+  text-align: center;
+}
+
+.graph-svg-tip {
+  position: absolute;
+  z-index: 99999;
+  padding: 10px;
+  font-size: 12px;
+  color: #959da5;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 3px;
+  ul {
+    padding-left: 0;
+    display: flex;
+  }
+  ol {
+    padding-left: 0;
+    display: flex;
+  }
+  ul.data-point-list {
+    li {
+      min-width: 90px;
+      flex: 1;
+      font-weight: 600;
+    }
+  }
+  strong {
+    color: #dfe2e5;
+    font-weight: 600;
+  }
+  .svg-pointer {
+    position: absolute;
+    height: 5px;
+    margin: 0 0 0 -5px;
+    content: " ";
+    border: 5px solid transparent;
+    border-top-color: rgba(0, 0, 0, 0.8);
+  }
+  &.comparison {
+    padding: 0;
+    text-align: left;
+    pointer-events: none;
+    .title {
+      display: block;
+      padding: 10px;
+      margin: 0;
+      font-weight: 600;
+      line-height: 1;
+      pointer-events: none;
+    }
+    ul {
+      margin: 0;
+      white-space: nowrap;
+      list-style: none;
+    }
+    li {
+      display: inline-block;
+      padding: 5px 10px;
+    }
+  }
+}
