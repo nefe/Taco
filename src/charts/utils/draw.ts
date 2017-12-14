@@ -61,7 +61,7 @@ export function makeYLine(
   });
 
   let text = createSVG('text', {
-    className: 'y-value-text',
+    className: 'y-axis-text',
     x: textEndAt,
     y: 0,
     dy: '.32em', // 文字向下稍微偏移
@@ -106,7 +106,7 @@ export function makeXLine(
   });
 
   let text = createSVG('text', {
-    className: 'x-axis-text',
+    className: 'y-axis-text',
     x: 0,
     y: textStartAt,
     dy: '.71em', // 文字向下稍微偏移

@@ -35,6 +35,7 @@ const data = {
 
 const lineChart = new Chart({
   parent: '#line-chart',
+  title: 'Line Chart',
   data: data,
   type: 'line', // or 'line', 'scatter', 'pie', 'percentage'
   height: 250,
@@ -92,7 +93,7 @@ const scatterData = {
   datasets: [
     {
       title: 'size',
-      values: [10, 2, 3, 4, 3, 2, 8]
+      values: [10, 3, 5, 4, 5, 6, 8]
     },
     {
       title: 'year',

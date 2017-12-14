@@ -154,7 +154,7 @@ class ScatterChart {
       })
     });
 
-    const contentWidth = this.width - 60;
+    const contentWidth = this.width - 40;
     const contentHeight = this.height - 20;
 
     // 开始画X坐标轴
@@ -203,7 +203,7 @@ class ScatterChart {
     })
     const chartContent = createSVG('g', {
       className: 'scatter-chart',
-      transform: 'translate(60, 10)'
+      transform: 'translate(40, 10)'
     })
     chartContent.appendChild(xAxisGroup);
     chartContent.appendChild(yAxisGroup);
