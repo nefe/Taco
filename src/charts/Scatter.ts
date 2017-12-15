@@ -4,6 +4,7 @@
  */
 import { getElementContentWidth, floatTwo } from "src/charts/utils";
 import { makePath, makeXLine, makeYLine, createSVG } from "src/charts/utils/draw";
+import { offset } from "src/charts/utils/dom";
 
 const DEFAULT_HEIGHT = 240;
 
@@ -83,6 +84,11 @@ class YAxis {
   ticks: number[];
 }
 
+interface TooltipValue {
+  color?: string;
+  label?: string | number;
+  value?: string | number;
+}
 class ScatterChart {
   /** 用户数据 */
   data: Data;
@@ -96,11 +102,81 @@ class ScatterChart {
   xAxis = new XAxis();
   yAxis = new YAxis();
 
+  chartContent: SVGElement;
+  tooltip: HTMLElement;
+  transformedData: any[] = [];
+
   constructor(config: ScatterConfig) {
     this.config = config;
     this.data = this.config.data;
     this.calculate();
     this.render();
+    // 最后绑定Tooltip事件
+  }
+
+  bindTooltips() {
+    this.chartContent.addEventListener('mousemove', this.mouseMove.bind(this));
+    this.chartContent.addEventListener('mouseleave', this.mouseLeave.bind(this));
+  }
+
+  updateTooltip(left: number, top: number, title: string, values: TooltipValue[]) {
+    if (!this.tooltip) {
+      this.tooltip = document.createElement('div');
+      this.tooltip.className = 'svg-tip';
+      this.parent.appendChild(this.tooltip);
+    }
+
+    const valueTpls = values.map((item) => {
+      return `<li>
+        <span>${item.label}</span>
+        <span class="number"><i style="background-color: ${item.color}"></i>${item.value}</span>
+      </li>`;
+    });
+
+    this.tooltip.innerHTML = `
+    <div>
+      <span class="title">${title}</span>
+      <ul class="data-list"></ul>
+    </div>
+    `;
+    this.tooltip.style.top = `${top - 100}px`; // 上移避免遮挡
+    this.tooltip.style.left = `${left}px`;
+    this.tooltip.style.display = 'block';
+    this.tooltip.querySelector('.data-list').innerHTML = valueTpls.join('');
+  }
+
+  hideTooltip() {
+    this.tooltip.style.display = 'none';
+    this.tooltip.style.top = '0';
+    this.tooltip.style.left = '0';
+  }
+
+  mouseMove(e: MouseEvent) {
+    let o = offset(this.parent);
+    let relX = e.pageX - o.left;
+    let relY = e.pageY - o.top;
+    const nearestIndex = this.findNearestIndex(relX, relY);
+    const nearest = this.transformedData[nearestIndex];
+    const pattern = this.config.pattern;
+    const values = [
+      { label: pattern[0], value: nearest[pattern[0]]},
+      { label: pattern[1], value: nearest[pattern[1]]},
+      { label: pattern[2], value: nearest[pattern[2]], color: `rgba(255, 0, 0, ${nearest.zPercent})`},
+    ]
+    this.updateTooltip(nearest.xPos, nearest.yPos, `第${nearestIndex + 1}个元素`, values);
+  }
+
+  mouseLeave() {
+    this.hideTooltip();
+  }
+
+  findNearestIndex(x: number, y: number) {
+    x = x - 35;
+    y = y - 7;
+    const distanceSquares = this.transformedData.map(entry => {
+      return (entry.xPos - x) * (entry.xPos - x) + (entry.yPos - y) * (entry.yPos - y);
+    });
+    return distanceSquares.indexOf(Math.min(...distanceSquares));
   }
 
   /**
@@ -137,21 +213,17 @@ class ScatterChart {
    * 渲染模块
    */
   render() {
-    console.log('rendering');
-
-    // 转换数据为易处理的格式
-    const transformedData: any[] = [];
-    this.data.datasets.forEach(o => {
-      o.values.forEach((entry, index) => {
-        if (transformedData[index] == null) { transformedData[index] = {};}
-        transformedData[index][o.title] = entry;
-        const max = Math.max(...o.values);
-        const min = Math.min(...o.values);
-        const percent = max > min ? (entry - min) / (max - min) : 0;
-
-        // 得到数据的比例
-        transformedData[index][o.title + 'Percent'] = percent;
-      })
+    // 添加画布
+    const svg = createSVG('svg', {
+      className: 'chart',
+      fill: 'none',
+      width: this.width,
+      height: this.height,
+    });
+    this.chartContent = createSVG('g', {
+      className: 'scatter-chart',
+      transform: 'translate(40, 10)',
+      inside: svg
     });
 
     const contentWidth = this.width - 40;
@@ -160,7 +232,8 @@ class ScatterChart {
     // 开始画X坐标轴
     const xAxisGroup = createSVG('g', {
       className: 'x axis',
-      transform: `translate(0, -7)`
+      transform: `translate(0, -7)`,
+      inside: this.chartContent
     });
     this.xAxis.ticks.forEach((val: number, index: number) => {
       const xPosUnit = (contentWidth - 30) / (this.xAxis.ticks.length - 1)
@@ -172,6 +245,7 @@ class ScatterChart {
     // 开始画Y坐标轴
     const yAxisGroup = createSVG('g', {
       className: 'y axis',
+      inside: this.chartContent
     });
     this.yAxis.ticks.forEach((val: number, index: number) => {
       const yPosUnit = (contentHeight - 35) / (this.yAxis.ticks.length - 1)
@@ -179,38 +253,53 @@ class ScatterChart {
       yAxisGroup.appendChild(yLine);
     });
 
+    // 转换数据为易处理的格式
+    const transformedData: any[] = [];
+    this.data.datasets.forEach(o => {
+      o.values.forEach((entry, index) => {
+        if (transformedData[index] == null) { transformedData[index] = {};}
+        transformedData[index][o.title] = entry;
+        const max = Math.max(...o.values);
+        // const percent = max > min ? (entry - min) / (max - min) : 0;
+        // const percent = entry / max;
+
+        const width = contentWidth - 30;
+        const height = contentHeight - 35;
+        // 得到数据的比例
+        const dataType = this.config.pattern.indexOf(o.title);
+        if (dataType === 0) {
+          transformedData[index].xPercent = entry / this.xAxis.ticks[this.xAxis.ticks.length - 1];
+          transformedData[index].xPos = transformedData[index].xPercent * width;
+        } else if (dataType === 1) {
+          transformedData[index].yPercent = entry / this.yAxis.ticks[this.yAxis.ticks.length - 1];
+          transformedData[index].yPos = transformedData[index].yPercent * height;
+        } else {
+          transformedData[index].zPercent = entry / max;
+        }
+      })
+    });
+    this.transformedData = transformedData;
+
     // 画散点图中的数据点
     const dataPoints = createSVG('g', {
-      className: 'data-points'
+      className: 'data-points',
+      inside: this.chartContent
     });
     const pattern = this.config.pattern;
     transformedData.forEach(data => {
       const circle = createSVG('circle', {
-        cx: data[pattern[0] + 'Percent'] * (contentWidth - 30),
-        cy: data[pattern[1] + 'Percent'] * (contentHeight - 35),
+        cx: data.xPos,
+        cy: data.yPos,
         r: 5,
         fill: 'red',
-        opacity: data[pattern[2] + 'Percent'],
+        opacity: data.zPercent,
       });
       dataPoints.appendChild(circle);
     })
 
-    // 添加画布
-    const svg = createSVG('svg', {
-      className: 'chart',
-      width: this.width,
-      height: this.height,
-    })
-    const chartContent = createSVG('g', {
-      className: 'scatter-chart',
-      transform: 'translate(40, 10)'
-    })
-    chartContent.appendChild(xAxisGroup);
-    chartContent.appendChild(yAxisGroup);
-    chartContent.appendChild(dataPoints);
-    svg.appendChild(chartContent);
-
     this.parent.appendChild(svg);
+    // FIXME 只能执行一次
+    this.bindTooltips();
   }
 }
 

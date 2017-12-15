@@ -41,7 +41,7 @@ $.create = (tag, o) => {
   return element;
 };
 
-export function offset(element) {
+export function offset(element: Element) {
   let rect = element.getBoundingClientRect();
   return {
     // https://stackoverflow.com/a/7436602/6495043

@@ -135,13 +135,14 @@ line {
 .svg-tip {
   position: absolute;
   z-index: 99999;
+  pointer-events: none;
   padding: 10px;
   font-size: 12px;
   color: #959da5;
-  text-align: center;
   background: rgba(0, 0, 0, 0.8);
   border-radius: 3px;
   text-align: left;
+  transition: top 200ms ease-in-out, left 200ms ease-in-out;
 }
 
 .svg-tip ul {

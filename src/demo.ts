@@ -93,11 +93,11 @@ const scatterData = {
   datasets: [
     {
       title: 'size',
-      values: [10, 3, 5, 4, 5, 6, 8]
+      values: [10, 9, 1, 4, 5, 6, 8]
     },
     {
       title: 'year',
-      values: [30, 300, 232.23, 422, 322, 423, 283]
+      values: [300, 100, 30, 422, 322, 423, 283]
     },
     {
       title: "price",

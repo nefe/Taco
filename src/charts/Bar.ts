@@ -307,7 +307,7 @@ class BarChart {
         pos: padding + heightInterval * index,
         text: String(tick),
       };
-    }); 
+    });
   }
 
   /** 设置各个值在 x 轴与 y 轴的真实位置 */
@@ -448,7 +448,7 @@ class BarChart {
 
       xAxisTick.appendChild(xAxisLine);
       xAxisTick.appendChild(xAxisText);
-    });    
+    });
   }
 
   renderValue() {
