@@ -115,8 +115,8 @@ class ScatterChart {
   }
 
   bindTooltips() {
-    this.chartContent.addEventListener('mousemove', this.mouseMove.bind(this));
-    this.chartContent.addEventListener('mouseleave', this.mouseLeave.bind(this));
+    this.parent.addEventListener('mousemove', this.mouseMove.bind(this));
+    this.parent.addEventListener('mouseleave', this.mouseLeave.bind(this));
   }
 
   updateTooltip(left: number, top: number, title: string, values: TooltipValue[]) {
