@@ -5,6 +5,7 @@
 import { getElementContentWidth, floatTwo } from "src/charts/utils";
 import { makePath, makeXLine, makeYLine, createSVG } from "src/charts/utils/draw";
 import { offset } from "src/charts/utils/dom";
+import Tooltip from 'src/charts/utils/Tooltip';
 
 const DEFAULT_HEIGHT = 240;
 
@@ -65,7 +66,7 @@ interface Data {
 
 interface ScatterConfig {
   /** 外部容器 */
-  parent: string | Element;
+  parent: string | HTMLElement;
   /** 图表高度 */
   height?: number;
   /** 模式，依次对应 x轴，y轴，透明度，圆大小 */
@@ -84,17 +85,12 @@ class YAxis {
   ticks: number[];
 }
 
-interface TooltipValue {
-  color?: string;
-  label?: string | number;
-  value?: string | number;
-}
 class ScatterChart {
   /** 用户数据 */
   data: Data;
   /** 用户配置 */
   config: ScatterConfig;
-  parent: Element;
+  parent: HTMLElement;
 
   width: number;
   height: number;
@@ -103,7 +99,7 @@ class ScatterChart {
   yAxis = new YAxis();
 
   chartContent: SVGElement;
-  tooltip: HTMLElement;
+  tooltip: Tooltip;
   transformedData: any[] = [];
 
   constructor(config: ScatterConfig) {
@@ -111,44 +107,14 @@ class ScatterChart {
     this.data = this.config.data;
     this.calculate();
     this.render();
-    // 最后绑定Tooltip事件
+    this.tooltip = new Tooltip(this.parent);
+    this.bindTooltips();
   }
 
+  /** listen to mouse event to show tooltip */
   bindTooltips() {
     this.parent.addEventListener('mousemove', this.mouseMove.bind(this));
     this.parent.addEventListener('mouseleave', this.mouseLeave.bind(this));
-  }
-
-  updateTooltip(left: number, top: number, title: string, values: TooltipValue[]) {
-    if (!this.tooltip) {
-      this.tooltip = document.createElement('div');
-      this.tooltip.className = 'svg-tip';
-      this.parent.appendChild(this.tooltip);
-    }
-
-    const valueTpls = values.map((item) => {
-      return `<li>
-        <span>${item.label}</span>
-        <span class="number"><i style="background-color: ${item.color}"></i>${item.value}</span>
-      </li>`;
-    });
-
-    this.tooltip.innerHTML = `
-    <div>
-      <span class="title">${title}</span>
-      <ul class="data-list"></ul>
-    </div>
-    `;
-    this.tooltip.style.top = `${top - 100}px`; // 上移避免遮挡
-    this.tooltip.style.left = `${left}px`;
-    this.tooltip.style.display = 'block';
-    this.tooltip.querySelector('.data-list').innerHTML = valueTpls.join('');
-  }
-
-  hideTooltip() {
-    this.tooltip.style.display = 'none';
-    this.tooltip.style.top = '0';
-    this.tooltip.style.left = '0';
   }
 
   mouseMove(e: MouseEvent) {
@@ -163,11 +129,11 @@ class ScatterChart {
       { label: pattern[1], value: nearest[pattern[1]]},
       { label: pattern[2], value: nearest[pattern[2]], color: `rgba(255, 0, 0, ${nearest.zPercent})`},
     ]
-    this.updateTooltip(nearest.xPos, nearest.yPos, `第${nearestIndex + 1}个元素`, values);
+    this.tooltip.update(nearest.xPos - 8, nearest.yPos - 4, `第${nearestIndex + 1}个元素`, values);
   }
 
   mouseLeave() {
-    this.hideTooltip();
+    this.tooltip.hide();
   }
 
   findNearestIndex(x: number, y: number) {
@@ -298,8 +264,6 @@ class ScatterChart {
     })
 
     this.parent.appendChild(svg);
-    // FIXME 只能执行一次
-    this.bindTooltips();
   }
 }
 

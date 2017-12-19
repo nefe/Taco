@@ -4,9 +4,11 @@
 import { AxisChart } from './AxisChart';
 import { Iargs } from '../index.d';
 import { createSVG, makePath } from './utils/draw';
-import { ToolTip } from './utils/Tooltip';
+import { ToolTip } from './utils/ExTooltip';
 
 export default class Line extends AxisChart {
+  tooltip: ToolTip;
+
   constructor(args: Iargs) {
     super(args);
     this.init();
