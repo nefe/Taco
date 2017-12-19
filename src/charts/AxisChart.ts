@@ -84,7 +84,6 @@ class AxisChart extends BaseChart {
     });
   }
   creteXAxis() {
-    console.log(this.drawWidth, 'this.drawWidth');
     this.xInterval = (this.drawWidth + 60) / (this.labels.length);
     this.labels.forEach((label, index) => {
       const xPos = this.xInterval * (index) + 15;

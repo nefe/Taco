@@ -4,10 +4,10 @@
 import { AxisChart } from './AxisChart';
 import { Iargs } from '../index.d';
 import { createSVG, makePath } from './utils/draw';
-import { ToolTip } from './utils/ExTooltip';
+import LineToolTip from './utils/LineTooltip';
 
 export default class Line extends AxisChart {
-  tooltip: ToolTip;
+  tooltip: LineToolTip;
 
   constructor(args: Iargs) {
     super(args);
@@ -15,7 +15,7 @@ export default class Line extends AxisChart {
   }
   init() {
     this.initPathGroup();
-    this.tooltip = new ToolTip({
+    this.tooltip = new LineToolTip({
       parent: this.parent,
       xPositons: this.xPositons,
       drawArea: this.drawArea,

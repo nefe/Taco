@@ -2,11 +2,11 @@
 /**
  * @file Chart Tip
  */
-
 import { $ } from "src/charts/utils/dom";
+import Tooltip from './Tooltip';
 
-export class ToolTip {
-  private tooltip;
+export default class LineToolTip {
+  private tooltip: Tooltip;
   private parent: Element;
   private drawArea: Element;
   private drawTop: number;
@@ -27,7 +27,7 @@ export class ToolTip {
     this.getYPosition = getYPosition;
     this.translateX = translateX;
     this.colors = colors;
-    this.addTooltip();
+    this.tooltip = new Tooltip(this.parent);
     this.addTooltipEvents();
   }
   calcOffset() {
@@ -45,23 +45,21 @@ export class ToolTip {
       this.changeTooltip(relX);
     });
     this.parent.addEventListener('mouseleave', () => {
-      this.hideToolTip();
+      this.tooltip.hide();
     });
   }
   changeTooltip(relX) {
-    console.log(relX, 'relX', this.xInterval);
     const activeIndex = Math.floor(relX / this.xInterval);
     const { label, values } = this.getValues(activeIndex);
-    const x = this.xPositons[activeIndex] + this.translateX;
+    const x = Number(this.xPositons[activeIndex]);
     const y = this.getYPosition([values[0].value])[0];
-    this.setTooltip(x, y, label, values);
+    this.tooltip.update(x + 2, y + 30, label, values);
   }
   getValues(activeIndex) {
     const label = this.labels[activeIndex];
-    // const values = [];
     const values = this.datasets.map((dataset, index) => {
       return {
-        title: dataset.title,
+        label: dataset.title,
         value: dataset.values[activeIndex],
         color: this.colors[index]
       }
@@ -72,38 +70,5 @@ export class ToolTip {
       label,
       values
     }
-  }
-  setTooltip(x, y, label, values) {
-    this.tooltip.querySelector('.title').innerHTML = label;
-    const valueTpls = values.map((item) => {
-      return `<li>
-        <span>${item.title}</span>
-        <span class="number"><i style="background-color: ${item.color}"></i>${item.value}</span>
-      </li>`;
-    });
-    this.tooltip.querySelector('.data-list').innerHTML = valueTpls.join('');
-    const rect = this.tooltip.getBoundingClientRect();
-    console.log(rect, '====');
-    this.showTooltip(y - rect.height, x - (rect.width / 2));
-  }
-  addTooltip() {
-    this.tooltip = $.create('div', {
-      inside: this.parent,
-      className: 'svg-tip',
-      innerHTML: `<span class="title">test</span>
-        <ul class="data-list">test</ul>
-        `
-    });
-    this.hideToolTip();
-  }
-  showTooltip(top, left) {
-    this.tooltip.style.top = `${top}px`;
-    this.tooltip.style.left = `${left}px`;
-    this.tooltip.style.display = 'block';
-	}
-  hideToolTip() {
-    this.tooltip.style.top = '0px';
-    this.tooltip.style.left = '0px';
-    this.tooltip.style.display = 'none';
   }
 }

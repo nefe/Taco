@@ -10,14 +10,14 @@ interface TooltipValue {
 
 export default class Tooltip {
   /** tooltip 最外层的 dom */
-  domNode: HTMLElement;
+  domNode: Element;
   /** tooltip 最外层的 dom */
-  parentNode: HTMLElement;
+  parentNode: Element;
 
   /**
    * @param parentNode dom node to render to
    */
-  constructor(parentNode: HTMLElement) {
+  constructor(parentNode: Element) {
     this.domNode = document.createElement('div');
     this.domNode.className = `svg-tip`;
     if (parentNode) {
