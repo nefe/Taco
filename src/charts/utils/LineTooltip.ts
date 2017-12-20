@@ -8,6 +8,7 @@ import Tooltip from './Tooltip';
 export default class LineToolTip {
   private tooltip: Tooltip;
   private parent: Element;
+  private chartWrapper: Element;
   private drawArea: Element;
   private drawTop: number;
   private xPositons: string[];
@@ -17,8 +18,9 @@ export default class LineToolTip {
   private getYPosition: any;
   private translateX: number;
   private colors: string[];
-  constructor({parent, drawArea, xPositons, xInterval, labels, datasets, getYPosition, translateX, colors}) {
+  constructor({parent, drawArea, chartWrapper, xPositons, xInterval, labels, datasets, getYPosition, translateX, colors}) {
     this.parent = parent;
+    this.chartWrapper = chartWrapper;
     this.drawArea = drawArea;
     this.xPositons = xPositons;
     this.xInterval = xInterval;
@@ -39,7 +41,7 @@ export default class LineToolTip {
     }
   }
   addTooltipEvents() {
-    this.drawArea.addEventListener('mousemove', (event: MouseEvent) => {
+    this.chartWrapper.addEventListener('mousemove', (event: MouseEvent) => {
       const offset = this.calcOffset();
       const relX = event.pageX - offset.left;
       this.changeTooltip(relX);

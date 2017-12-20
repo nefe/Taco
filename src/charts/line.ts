@@ -18,6 +18,7 @@ export default class Line extends AxisChart {
     this.tooltip = new LineToolTip({
       parent: this.parent,
       xPositons: this.xPositons,
+      chartWrapper: this.chartWrapper,
       drawArea: this.drawArea,
       xInterval: this.xInterval,
       labels: this.labels,
