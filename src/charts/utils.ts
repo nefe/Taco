@@ -78,7 +78,7 @@ export const $ = {
 
 /**
  * 获取 element 在整个页面中的 top 与 left
- * @param element 
+ * @param element
  */
 export function offset(element: HTMLElement) {
 	let rect = element.getBoundingClientRect();
@@ -89,8 +89,11 @@ export function offset(element: HTMLElement) {
 }
 
 interface Value {
-	y: number,
-	height: number,
+	x?: number,
+	y?: number,
+	height?: number,
+	width?: number,
+	[key: string]: any
 }
 
 interface SVGAnimateOptions {
