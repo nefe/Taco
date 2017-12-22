@@ -1,27 +1,36 @@
+/** 动画参数 */
+const EASING = {
+  ease: "0.25 0.1 0.25 1",
+  linear: "0 0 1 1",
+  easein: "0.1 0.8 0.2 1",
+  easeout: "0 0 0.58 1",
+  easeinout: "0.42 0 0.58 1"
+};
+
 /**
  * 创建一个 SVG 元素
  * @param tag 标签名
  * @param o 对象
  */
 export function createSVG(tag: string, options: any) {
-  const element = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  const element = document.createElementNS("http://www.w3.org/2000/svg", tag);
 
   for (let key in options) {
     if (options.hasOwnProperty(key)) {
       const val = options[key];
-      if (key === 'inside') {
+      if (key === "inside") {
         val.appendChild(element);
-      } else if (key === 'styles') {
-        if (typeof val === 'object') {
+      } else if (key === "styles") {
+        if (typeof val === "object") {
           Object.keys(val).map((prop: string) => {
             (element.style as any)[prop] = val[prop];
           });
         }
       } else {
-        if (key === 'className') {
-          key = 'class'; // 兼容 react 中的 className
-        } else if (key === 'innerHTML') {
-          element['textContent'] = val;
+        if (key === "className") {
+          key = "class"; // 兼容 react 中的 className
+        } else if (key === "innerHTML") {
+          element["textContent"] = val;
         }
         // 设置属性，最重要的一行
         element.setAttribute(key, val);
@@ -49,33 +58,33 @@ export function makeYLine(
   point: number | string,
   yPos: number,
   darker = false,
-  lineType = ''
+  lineType = ""
 ) {
-  let line = createSVG('line', {
-    className: lineType === 'dashed' ? 'dashed' : '',
+  let line = createSVG("line", {
+    className: lineType === "dashed" ? "dashed" : "",
     x1: startAt,
     x2: width,
     y1: 0,
     y2: 0,
-    stroke: '#dadada'
+    stroke: "#dadada"
   });
 
-  let text = createSVG('text', {
-    className: 'y-axis-text',
+  let text = createSVG("text", {
+    className: "y-axis-text",
     x: textEndAt,
     y: 0,
-    dy: '.32em', // 文字向下稍微偏移
-    innerHTML: point + ''
+    dy: ".32em", // 文字向下稍微偏移
+    innerHTML: point + ""
   });
 
-  let yLine = createSVG('g', {
+  let yLine = createSVG("g", {
     className: `tick y-axis-label`,
     transform: `translate(0, ${yPos})`, // 平移
-    'stroke-opacity': 1
+    "stroke-opacity": 1
   });
 
   if (darker) {
-    line.style.stroke = 'rgba(27, 31, 35, 0.6)';
+    line.style.stroke = "rgba(27, 31, 35, 0.6)";
   }
 
   yLine.appendChild(line);
@@ -97,23 +106,23 @@ export function makeXLine(
   point: string | number,
   xPos: number
 ) {
-  let line = createSVG('line', {
+  let line = createSVG("line", {
     x1: 0,
     x2: 0,
     y1: 0,
     y2: height,
-    stroke: '#dadada'
+    stroke: "#dadada"
   });
 
-  let text = createSVG('text', {
-    className: 'y-axis-text',
+  let text = createSVG("text", {
+    className: "y-axis-text",
     x: 0,
     y: textStartAt,
-    dy: '.71em', // 文字向下稍微偏移
+    dy: ".71em", // 文字向下稍微偏移
     innerHTML: point
   });
 
-  let xLine = createSVG('g', {
+  let xLine = createSVG("g", {
     className: `tick x-axis-label`,
     transform: `translate(${xPos}, 0)`
   });
@@ -129,11 +138,11 @@ export function makeXLine(
  */
 export function makePath(
   pathStr: string,
-  className = '',
-  stroke = 'none',
-  fill = 'none'
+  className = "",
+  stroke = "none",
+  fill = "none"
 ) {
-  return createSVG('path', {
+  return createSVG("path", {
     className: className,
     d: pathStr,
     styles: {
@@ -141,4 +150,43 @@ export function makePath(
       fill: fill
     }
   });
+}
+
+interface Value {
+  x?: number;
+  y?: number;
+  height?: number;
+  width?: number;
+  [key: string]: any;
+}
+
+interface SVGAnimateOptions {
+  inside: SVGElement;
+  dur: number;
+  new: Value;
+  old: Value;
+}
+
+export function creatSVGAnimate(options: SVGAnimateOptions) {
+  const { inside, old, dur } = options;
+  for (let attributeName in options.new) {
+    const to = (options.new as any)[attributeName];
+    const from = (old as any)[attributeName];
+
+    const animAttr = {
+      inside,
+      attributeName,
+      from,
+      to,
+      begin: "0s",
+      dur: `${dur / 1000}s`,
+      values: from + ";" + to,
+      keySplines: EASING.ease,
+      keyTimes: "0;1",
+      calcMode: "spline",
+      fill: "freeze"
+    };
+
+    createSVG("animate", animAttr);
+  }
 }

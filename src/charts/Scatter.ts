@@ -1,4 +1,4 @@
-import { creatSVGAnimate } from 'src/charts/utils';
+import { creatSVGAnimate } from 'src/charts/utils/draw';
 /**
  * 散点图，将所有的数据以点的形式展现在笛卡尔坐标系上。可以通过x轴，y轴，透明度，圆大小来展示4个维度的数据。
  * 我们可以推断出变量间的相关性。
@@ -255,14 +255,12 @@ class ScatterChart {
     const pattern = this.config.pattern;
     transformedData.forEach(data => {
       const circle = createSVG('circle', {
-        // cx: data.xPos,
-        // cy: data.yPos,
         r: 5,
         fill: 'red',
         opacity: data.zPercent,
       });
       creatSVGAnimate({
-        parent: circle,
+        inside: circle,
         dur: 1000,
         new: {
           cx: data.xPos,

@@ -1,4 +1,5 @@
-import { getElementContentWidth, floatTwo, $, offset, creatSVGAnimate } from "src/charts/utils";
+import { getElementContentWidth, floatTwo, $, offset } from "src/charts/utils";
+import { creatSVGAnimate } from 'src/charts/utils/draw';
 import Tooltip from './Tooltip';
 
 /**
@@ -481,7 +482,7 @@ class BarChart {
         dataG.appendChild(dataRect);
 
         creatSVGAnimate({
-          parent: dataRect,
+          inside: dataRect,
           dur: 1000,
           new: {
             y: pos.y,
