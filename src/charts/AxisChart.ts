@@ -32,11 +32,11 @@ class AxisChart extends BaseChart {
   }
   initAxisContainer() {
     this.xAxisContainer = createSVG('g', {
-      inside: this.drawArea,
+      parent: this.drawArea,
       className: 'x axis',
     });
     this.yAxisContainer = createSVG('g', {
-      inside: this.drawArea,
+      parent: this.drawArea,
       className: 'y axis'
     });
   }

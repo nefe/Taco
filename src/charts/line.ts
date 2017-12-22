@@ -32,7 +32,7 @@ export default class Line extends AxisChart {
     this.datasets.map((dataset: any, index: number) => {
       const color = dataset.color || this.args.colors[index % this.args.colors.length];
       const grouSvg = createSVG('g', {
-        inside: this.drawArea,
+        parent: this.drawArea,
         className: `path-group path-group-${index}`,
       });
       const linePath = this.getLinePath(dataset.values, color);

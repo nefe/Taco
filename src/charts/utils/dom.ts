@@ -19,7 +19,7 @@ $.create = (tag, o) => {
   for (var i in o) {
     var val = o[i];
 
-    if (i === 'inside') {
+    if (i === 'parent') {
       $(val).appendChild(element);
     } else if (i === 'around') {
       var ref = $(val);

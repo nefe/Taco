@@ -22,7 +22,7 @@ class ToolTip {
 
   makeTooltip() {
     this.container = $.create('div', {
-      inside: this.parent,
+      parent: this.parent,
       className: 'graph-svg-tip comparison',
       innerHTML: `<div className="graph-svg-tip-content">
         <span class="title"></span>
@@ -36,7 +36,7 @@ class ToolTip {
     this.parent.addEventListener('mouseleave', () => {
 			this.hideTip();
     });
-    
+
     this.hideTip();
   }
 
@@ -51,7 +51,7 @@ class ToolTip {
 			});
 			this.data_point_list.appendChild(li);
     });
-    
+
     const width = this.container.offsetWidth;
     const height = this.container.offsetHeight;
     this.x = this.point.x - width / 2;

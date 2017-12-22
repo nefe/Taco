@@ -190,7 +190,7 @@ class ScatterChart {
     this.chartContent = createSVG('g', {
       className: 'scatter-chart',
       transform: 'translate(40, 10)',
-      inside: svg
+      parent: svg
     });
 
     const contentWidth = this.width - 40;
@@ -200,7 +200,7 @@ class ScatterChart {
     const xAxisGroup = createSVG('g', {
       className: 'x axis',
       transform: `translate(0, -7)`,
-      inside: this.chartContent
+      parent: this.chartContent
     });
     this.xAxis.ticks.forEach((val: number, index: number) => {
       const xPosUnit = (contentWidth - 30) / (this.xAxis.ticks.length - 1)
@@ -212,7 +212,7 @@ class ScatterChart {
     // 开始画Y坐标轴
     const yAxisGroup = createSVG('g', {
       className: 'y axis',
-      inside: this.chartContent
+      parent: this.chartContent
     });
     this.yAxis.ticks.forEach((val: number, index: number) => {
       const yPosUnit = (contentHeight - 35) / (this.yAxis.ticks.length - 1)
@@ -250,7 +250,7 @@ class ScatterChart {
     // 画散点图中的数据点
     const dataPoints = createSVG('g', {
       className: 'data-points',
-      inside: this.chartContent
+      parent: this.chartContent
     });
     const pattern = this.config.pattern;
     transformedData.forEach(data => {
@@ -260,7 +260,7 @@ class ScatterChart {
         opacity: data.zPercent,
       });
       creatSVGAnimate({
-        inside: circle,
+        parent: circle,
         dur: 1000,
         new: {
           cx: data.xPos,

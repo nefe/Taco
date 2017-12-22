@@ -18,7 +18,7 @@ export function createSVG(tag: string, options: any) {
   for (let key in options) {
     if (options.hasOwnProperty(key)) {
       const val = options[key];
-      if (key === "inside") {
+      if (key === "parent") {
         val.appendChild(element);
       } else if (key === "styles") {
         if (typeof val === "object") {
@@ -161,20 +161,20 @@ interface Value {
 }
 
 interface SVGAnimateOptions {
-  inside: SVGElement;
+  parent: SVGElement;
   dur: number;
   new: Value;
   old: Value;
 }
 
 export function creatSVGAnimate(options: SVGAnimateOptions) {
-  const { inside, old, dur } = options;
+  const { parent, old, dur } = options;
   for (let attributeName in options.new) {
     const to = (options.new as any)[attributeName];
     const from = (old as any)[attributeName];
 
     const animAttr = {
-      inside,
+      parent,
       attributeName,
       from,
       to,

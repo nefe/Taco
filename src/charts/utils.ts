@@ -39,7 +39,7 @@ export const $ = {
 		const element = document.createElement(tag);
 		for (var key in options) {
 			const value = options[key];
-			if (key === 'inside') {
+			if (key === 'parent') {
 				$.select(value).appendChild(element);
 			}
 			if (key in element) {
@@ -56,7 +56,7 @@ export const $ = {
 			if (key === "className") {
 				key = "class";
 			}
-			if (key === "inside") {
+			if (key === "parent") {
 				$.select(value).appendChild(element);
 			} else if (key === "innerHTML") {
 				element['textContent'] = value;

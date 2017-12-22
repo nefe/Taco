@@ -61,18 +61,18 @@ class BaseChart {
   initChartArea() {
     this.svg = createSVG('svg', {
       className: 'chart',
-      inside: this.chartWrapper,
+      parent: this.chartWrapper,
       width: this.chartWidth,
       height: this.chartHeight
     });
     this.svgDefs = createSVG('defs', {
-      inside: this.svg,
+      parent: this.svg,
     });
   }
   initDrawArea() {
     this.drawArea = createSVG('g', {
       className: `${this.type}-chart`,
-      inside: this.svg,
+      parent: this.svg,
       transform: `translate(${this.translateX}, ${this.translateY})`
     });
   }

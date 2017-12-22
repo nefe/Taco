@@ -370,7 +370,7 @@ class BarChart {
 
     this.svg = $.createSVG('svg', {
       className: 'chart',
-      inside: this.chartWrapper,
+      parent: this.chartWrapper,
       width: this.width,
       height: this.height,
     });
@@ -385,7 +385,7 @@ class BarChart {
     // 渲染 y 轴坐标
     this.yAxisGroup = $.createSVG('g', {
       className: 'y-axis',
-      inside: this.svg,
+      parent: this.svg,
     });
 
     this.yAxis.unitList.forEach((unit, index) => {
@@ -393,7 +393,7 @@ class BarChart {
 
       const yAxisTick = $.createSVG('g', {
         className: 'y-axis-tick',
-        inside: this.yAxisGroup,
+        parent: this.yAxisGroup,
         transform: `translate(0, ${pos})`,
       });
 
@@ -420,7 +420,7 @@ class BarChart {
     // 渲染 x 轴坐标
     this.xAxisGroup = $.createSVG('g', {
       className: 'x-axis',
-      inside: this.svg,
+      parent: this.svg,
       transform: `translate(0, ${this.height - this.xAxis.height})`,
     });
 
@@ -429,7 +429,7 @@ class BarChart {
 
       const xAxisTick = $.createSVG('g', {
         className: 'x-axis-tick',
-        inside: this.xAxisGroup,
+        parent: this.xAxisGroup,
         transform: `translate(${centerPos}, 0)`,
       });
       const xAxisLine = $.createSVG('line', {
@@ -457,7 +457,7 @@ class BarChart {
       const color = this.config.colors[index];
       const dataG = $.createSVG('g', {
         className: 'data-points',
-        inside: this.svg,
+        parent: this.svg,
       });
 
       data.forEach(pos => {
@@ -482,7 +482,7 @@ class BarChart {
         dataG.appendChild(dataRect);
 
         creatSVGAnimate({
-          inside: dataRect,
+          parent: dataRect,
           dur: 1000,
           new: {
             y: pos.y,
