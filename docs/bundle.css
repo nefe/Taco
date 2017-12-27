@@ -473,7 +473,8 @@ line {
   background: rgba(0, 0, 0, 0.8);
   border-radius: 3px;
   text-align: left;
-  transition: top 200ms ease-in-out, left 200ms ease-in-out; }
+  transition: top 200ms ease-in-out, left 200ms ease-in-out;
+  display: none; }
   .svg-tip.top {
     transform: translateY(-100%); }
   .svg-tip.top:after {

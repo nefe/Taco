@@ -1,33 +1,52 @@
 (function () {
 'use strict';
 
+const __assign = Object.assign || function (target) {
+    for (var source, i = 1; i < arguments.length; i++) {
+        source = arguments[i];
+        for (var prop in source) {
+            if (Object.prototype.hasOwnProperty.call(source, prop)) {
+                target[prop] = source[prop];
+            }
+        }
+    }
+    return target;
+};
+
 function __extends(d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 }
 
+var EASING = {
+    ease: "0.25 0.1 0.25 1",
+    linear: "0 0 1 1",
+    easein: "0.1 0.8 0.2 1",
+    easeout: "0 0 0.58 1",
+    easeinout: "0.42 0 0.58 1"
+};
 function createSVG(tag, options) {
-    var element = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    var element = document.createElementNS("http://www.w3.org/2000/svg", tag);
     var _loop_1 = function (key) {
         if (options.hasOwnProperty(key)) {
             var val_1 = options[key];
-            if (key === 'inside') {
+            if (key === "parent") {
                 val_1.appendChild(element);
             }
-            else if (key === 'styles') {
-                if (typeof val_1 === 'object') {
+            else if (key === "styles") {
+                if (typeof val_1 === "object") {
                     Object.keys(val_1).map(function (prop) {
                         element.style[prop] = val_1[prop];
                     });
                 }
             }
             else {
-                if (key === 'className') {
-                    key = 'class';
+                if (key === "className") {
+                    key = "class";
                 }
-                else if (key === 'innerHTML') {
-                    element['textContent'] = val_1;
+                else if (key === "innerHTML") {
+                    element["textContent"] = val_1;
                 }
                 element.setAttribute(key, val_1);
             }
@@ -40,50 +59,50 @@ function createSVG(tag, options) {
 }
 function makeYLine(startAt, width, textEndAt, point, yPos, darker, lineType) {
     if (darker === void 0) { darker = false; }
-    if (lineType === void 0) { lineType = ''; }
-    var line = createSVG('line', {
-        className: lineType === 'dashed' ? 'dashed' : '',
+    if (lineType === void 0) { lineType = ""; }
+    var line = createSVG("line", {
+        className: lineType === "dashed" ? "dashed" : "",
         x1: startAt,
         x2: width,
         y1: 0,
         y2: 0,
-        stroke: '#dadada'
+        stroke: "#dadada"
     });
-    var text = createSVG('text', {
-        className: 'y-axis-text',
+    var text = createSVG("text", {
+        className: "y-axis-text",
         x: textEndAt,
         y: 0,
-        dy: '.32em',
-        innerHTML: point + ''
+        dy: ".32em",
+        innerHTML: point + ""
     });
-    var yLine = createSVG('g', {
+    var yLine = createSVG("g", {
         className: "tick y-axis-label",
         transform: "translate(0, " + yPos + ")",
-        'stroke-opacity': 1
+        "stroke-opacity": 1
     });
     if (darker) {
-        line.style.stroke = 'rgba(27, 31, 35, 0.6)';
+        line.style.stroke = "rgba(27, 31, 35, 0.6)";
     }
     yLine.appendChild(line);
     yLine.appendChild(text);
     return yLine;
 }
 function makeXLine(height, textStartAt, point, xPos) {
-    var line = createSVG('line', {
+    var line = createSVG("line", {
         x1: 0,
         x2: 0,
         y1: 0,
         y2: height,
-        stroke: '#dadada'
+        stroke: "#dadada"
     });
-    var text = createSVG('text', {
-        className: 'y-axis-text',
+    var text = createSVG("text", {
+        className: "y-axis-text",
         x: 0,
         y: textStartAt,
-        dy: '.71em',
+        dy: ".71em",
         innerHTML: point
     });
-    var xLine = createSVG('g', {
+    var xLine = createSVG("g", {
         className: "tick x-axis-label",
         transform: "translate(" + xPos + ", 0)"
     });
@@ -92,10 +111,10 @@ function makeXLine(height, textStartAt, point, xPos) {
     return xLine;
 }
 function makePath(pathStr, className, stroke, fill) {
-    if (className === void 0) { className = ''; }
-    if (stroke === void 0) { stroke = 'none'; }
-    if (fill === void 0) { fill = 'none'; }
-    return createSVG('path', {
+    if (className === void 0) { className = ""; }
+    if (stroke === void 0) { stroke = "none"; }
+    if (fill === void 0) { fill = "none"; }
+    return createSVG("path", {
         className: className,
         d: pathStr,
         styles: {
@@ -103,6 +122,27 @@ function makePath(pathStr, className, stroke, fill) {
             fill: fill
         }
     });
+}
+function creatSVGAnimate(options) {
+    var parent = options.parent, old = options.old, dur = options.dur;
+    for (var attributeName in options.new) {
+        var to = options.new[attributeName];
+        var from = old[attributeName];
+        var animAttr = {
+            parent: parent,
+            attributeName: attributeName,
+            from: from,
+            to: to,
+            begin: "0s",
+            dur: dur / 1000 + "s",
+            values: from + ";" + to,
+            keySplines: EASING.ease,
+            keyTimes: "0;1",
+            calcMode: "spline",
+            fill: "freeze"
+        };
+        createSVG("animate", animAttr);
+    }
 }
 //# sourceMappingURL=draw.js.map
 
@@ -143,18 +183,18 @@ var BaseChart = (function () {
     BaseChart.prototype.initChartArea = function () {
         this.svg = createSVG('svg', {
             className: 'chart',
-            inside: this.chartWrapper,
+            parent: this.chartWrapper,
             width: this.chartWidth,
             height: this.chartHeight
         });
         this.svgDefs = createSVG('defs', {
-            inside: this.svg,
+            parent: this.svg,
         });
     };
     BaseChart.prototype.initDrawArea = function () {
         this.drawArea = createSVG('g', {
             className: this.type + "-chart",
-            inside: this.svg,
+            parent: this.svg,
             transform: "translate(" + this.translateX + ", " + this.translateY + ")"
         });
     };
@@ -181,11 +221,11 @@ var AxisChart = (function (_super) {
     }
     AxisChart.prototype.initAxisContainer = function () {
         this.xAxisContainer = createSVG('g', {
-            inside: this.drawArea,
+            parent: this.drawArea,
             className: 'x axis',
         });
         this.yAxisContainer = createSVG('g', {
-            inside: this.drawArea,
+            parent: this.drawArea,
             className: 'y axis'
         });
     };
@@ -383,7 +423,7 @@ var Line = (function (_super) {
         this.datasets.map(function (dataset, index) {
             var color = dataset.color || _this.args.colors[index % _this.args.colors.length];
             var grouSvg = createSVG('g', {
-                inside: _this.drawArea,
+                parent: _this.drawArea,
                 className: "path-group path-group-" + index,
             });
             var linePath = _this.getLinePath(dataset.values, color);
@@ -417,13 +457,6 @@ var Chart = (function () {
     return Chart;
 }());
 
-var EASING = {
-    ease: "0.25 0.1 0.25 1",
-    linear: "0 0 1 1",
-    easein: "0.1 0.8 0.2 1",
-    easeout: "0 0 0.58 1",
-    easeinout: "0.42 0 0.58 1"
-};
 function getElementContentWidth(element) {
     var styles = window.getComputedStyle(element);
     var padding = parseFloat(styles.paddingLeft) + parseFloat(styles.paddingRight);
@@ -441,7 +474,7 @@ var $ = {
         var element = document.createElement(tag);
         for (var key in options) {
             var value = options[key];
-            if (key === 'inside') {
+            if (key === 'parent') {
                 $.select(value).appendChild(element);
             }
             if (key in element) {
@@ -457,7 +490,7 @@ var $ = {
             if (key === "className") {
                 key = "class";
             }
-            if (key === "inside") {
+            if (key === "parent") {
                 $.select(value).appendChild(element);
             }
             else if (key === "innerHTML") {
@@ -477,30 +510,6 @@ function offset(element) {
         left: rect.left + (document.documentElement.scrollLeft || document.body.scrollLeft)
     };
 }
-function creatSVGAnimate(options) {
-    var parent = options.parent, old = options.old, dur = options.dur;
-    for (var attributeName in options.new) {
-        var to = options.new[attributeName];
-        var from = old[attributeName];
-        var animateElement = document.createElementNS("http://www.w3.org/2000/svg", "animate");
-        var animAttr = {
-            attributeName: attributeName,
-            from: from,
-            to: to,
-            begin: "0s",
-            dur: dur / 1000 + "s",
-            values: from + ";" + to,
-            keySplines: EASING.ease,
-            keyTimes: "0;1",
-            calcMode: "spline",
-            fill: "freeze",
-        };
-        for (var attr in animAttr) {
-            animateElement.setAttribute(attr, animAttr[attr]);
-        }
-        parent.appendChild(animateElement);
-    }
-}
 //# sourceMappingURL=utils.js.map
 
 var ToolTip = (function () {
@@ -511,7 +520,7 @@ var ToolTip = (function () {
     ToolTip.prototype.makeTooltip = function () {
         var _this = this;
         this.container = $.create('div', {
-            inside: this.parent,
+            parent: this.parent,
             className: 'graph-svg-tip comparison',
             innerHTML: "<div className=\"graph-svg-tip-content\">\n        <span class=\"title\"></span>\n        <ul class=\"data-point-list\"></ul>\n      </div>"
         });
@@ -770,7 +779,7 @@ var BarChart = (function () {
         this.chartWrapper = this.container.querySelector('.frappe-chart');
         this.svg = $.createSVG('svg', {
             className: 'chart',
-            inside: this.chartWrapper,
+            parent: this.chartWrapper,
             width: this.width,
             height: this.height,
         });
@@ -782,13 +791,13 @@ var BarChart = (function () {
         var _this = this;
         this.yAxisGroup = $.createSVG('g', {
             className: 'y-axis',
-            inside: this.svg,
+            parent: this.svg,
         });
         this.yAxis.unitList.forEach(function (unit, index) {
             var pos = unit.pos, text = unit.text;
             var yAxisTick = $.createSVG('g', {
                 className: 'y-axis-tick',
-                inside: _this.yAxisGroup,
+                parent: _this.yAxisGroup,
                 transform: "translate(0, " + pos + ")",
             });
             var yAxisLine = $.createSVG('line', {
@@ -810,14 +819,14 @@ var BarChart = (function () {
         });
         this.xAxisGroup = $.createSVG('g', {
             className: 'x-axis',
-            inside: this.svg,
+            parent: this.svg,
             transform: "translate(0, " + (this.height - this.xAxis.height) + ")",
         });
         this.xAxis.unitList.forEach(function (unit, index) {
             var centerPos = unit.centerPos, text = unit.text;
             var xAxisTick = $.createSVG('g', {
                 className: 'x-axis-tick',
-                inside: _this.xAxisGroup,
+                parent: _this.xAxisGroup,
                 transform: "translate(" + centerPos + ", 0)",
             });
             var xAxisLine = $.createSVG('line', {
@@ -844,7 +853,7 @@ var BarChart = (function () {
             var color = _this.config.colors[index];
             var dataG = $.createSVG('g', {
                 className: 'data-points',
-                inside: _this.svg,
+                parent: _this.svg,
             });
             data.forEach(function (pos) {
                 var value = pos.value, x = pos.x, y = pos.y, width = pos.width, height = pos.height, oldValue = pos.oldValue;
@@ -1005,14 +1014,14 @@ var ScatterChart = (function () {
         this.chartContent = createSVG('g', {
             className: 'scatter-chart',
             transform: 'translate(40, 10)',
-            inside: svg
+            parent: svg
         });
         var contentWidth = this.width - 40;
         var contentHeight = this.height - 20;
         var xAxisGroup = createSVG('g', {
             className: 'x axis',
             transform: "translate(0, -7)",
-            inside: this.chartContent
+            parent: this.chartContent
         });
         this.xAxis.ticks.forEach(function (val, index) {
             var xPosUnit = (contentWidth - 30) / (_this.xAxis.ticks.length - 1);
@@ -1021,7 +1030,7 @@ var ScatterChart = (function () {
         });
         var yAxisGroup = createSVG('g', {
             className: 'y axis',
-            inside: this.chartContent
+            parent: this.chartContent
         });
         this.yAxis.ticks.forEach(function (val, index) {
             var yPosUnit = (contentHeight - 35) / (_this.yAxis.ticks.length - 1);
@@ -1055,16 +1064,26 @@ var ScatterChart = (function () {
         this.transformedData = transformedData;
         var dataPoints = createSVG('g', {
             className: 'data-points',
-            inside: this.chartContent
+            parent: this.chartContent
         });
         var pattern = this.config.pattern;
         transformedData.forEach(function (data) {
             var circle = createSVG('circle', {
-                cx: data.xPos,
-                cy: data.yPos,
                 r: 5,
                 fill: 'red',
                 opacity: data.zPercent,
+            });
+            creatSVGAnimate({
+                parent: circle,
+                dur: 1000,
+                new: {
+                    cx: data.xPos,
+                    cy: data.yPos,
+                },
+                old: {
+                    cx: data.xPos,
+                    cy: contentHeight - 20,
+                }
             });
             dataPoints.appendChild(circle);
         });
@@ -1159,6 +1178,139 @@ var Pie = (function (_super) {
     };
     return Pie;
 }(BaseChart));
+
+var nodeWidth = 20;
+var heightPadding = 20;
+var SankeyChart = (function () {
+    function SankeyChart(config) {
+        this.config = config;
+        this.parent = config.parent;
+        this.width = this.parent.getBoundingClientRect().width;
+        this.height = config.height;
+        this.initContainer();
+        this.initNodes();
+        this.initLinks();
+    }
+    SankeyChart.prototype.initContainer = function () {
+        this.parent.innerHTML = "<canvas class=\"sankey-container\" width=" + this.width + " height=" + this.config.height + " />";
+        this.canvas = this.parent.querySelector('canvas');
+        this.ctx = this.canvas.getContext('2d');
+    };
+    SankeyChart.prototype.initNodes = function () {
+        this.calNodes();
+        this.drawNodes();
+    };
+    SankeyChart.prototype.initLinks = function () {
+        this.calLinks();
+        this.drawLinks();
+    };
+    SankeyChart.prototype.getMaxValue = function () {
+        var maxValue = 0;
+        this.config.nodes.forEach(function (nodes) {
+            nodes.forEach(function (node) {
+                maxValue = Math.max(node.value, maxValue);
+            });
+        });
+        return maxValue;
+    };
+    SankeyChart.prototype.calNodes = function () {
+        var _this = this;
+        var xInterval = (this.width - nodeWidth) / (this.config.nodes.length - 1);
+        this.nodes = [];
+        var maxValue = this.getMaxValue();
+        var xNodesLength = this.config.nodes.length;
+        this.config.nodes.forEach(function (nodes, xIndex) {
+            var x = xIndex * xInterval;
+            var heightInterval = (_this.height - heightPadding * 2) / maxValue;
+            var yInterval = (_this.height - heightPadding * 2) / nodes.length;
+            var yTopPaddingInterval = (_this.height - heightPadding * 2) / xNodesLength;
+            var yTopPadding = xIndex === xNodesLength - 1 ? 0 : yTopPaddingInterval * xIndex;
+            nodes.forEach(function (node, yIndex) {
+                var height = heightInterval * node.value - 40;
+                var y = yIndex * yInterval + yTopPadding;
+                _this.nodes.push(__assign({}, node, { x: x,
+                    y: y,
+                    height: height }));
+            });
+        });
+    };
+    SankeyChart.prototype.drawNodes = function () {
+        var _this = this;
+        this.nodes.forEach(function (node, index) {
+            var colorIndex = index % _this.config.colors.length;
+            _this.ctx.fillStyle = _this.config.colors[colorIndex];
+            _this.ctx.fillRect(node.x, node.y, nodeWidth, node.height);
+        });
+    };
+    SankeyChart.prototype.calLinks = function () {
+        var _this = this;
+        this.links = [];
+        var nodes = {};
+        this.nodes.forEach(function (oneNode) {
+            nodes[oneNode.node] = oneNode;
+        });
+        var sources = {};
+        var targets = {};
+        this.config.links.forEach(function (link) {
+            var source = nodes[link.source];
+            var target = nodes[link.target];
+            var sourceHeight = source.height / source.value * link.value;
+            var targetHeight = target.height / target.value * link.value;
+            var sourceYOffset = 0;
+            var targetYOffset = 0;
+            if (sources[link.source]) {
+                sourceYOffset = sources[link.source].reduce(function (accumulator, currentLink) {
+                    return accumulator + currentLink.sourceHeight;
+                }, 0);
+            }
+            if (targets[link.target]) {
+                targetYOffset = targets[link.target].reduce(function (accumulator, currentLink) {
+                    return accumulator + currentLink.targetHeight;
+                }, 0);
+            }
+            var linkData = __assign({}, link, { x0: source.x + nodeWidth, y0: source.y + sourceYOffset, sourceHeight: sourceHeight,
+                targetHeight: targetHeight, x1: target.x, y1: target.y + targetYOffset });
+            if (sources[link.source]) {
+                sources[link.source].push(linkData);
+            }
+            else {
+                sources[link.source] = [linkData];
+            }
+            if (targets[link.target]) {
+                targets[link.target].push(linkData);
+            }
+            else {
+                targets[link.target] = [linkData];
+            }
+            _this.links.push(linkData);
+        });
+    };
+    SankeyChart.prototype.interpolateNumber = function (a, b) {
+        return (a = +a, b -= a, function (t) {
+                return a + b * t;
+            });
+    };
+    SankeyChart.prototype.drawLinks = function () {
+        var _this = this;
+        this.links.forEach(function (link) {
+            var curvature = 0.5;
+            var xi = _this.interpolateNumber(link.x0, link.x1);
+            var x2 = xi(curvature);
+            var x3 = xi(1 - curvature);
+            _this.ctx.beginPath();
+            _this.ctx.moveTo(link.x0, link.y0);
+            _this.ctx.bezierCurveTo(x2, link.y0, x3, link.y1, link.x1, link.y1);
+            _this.ctx.lineTo(link.x1, link.y1);
+            _this.ctx.lineTo(link.x1, link.y1 + link.targetHeight);
+            _this.ctx.bezierCurveTo(x3, link.y1 + link.targetHeight, x2, link.y0 + link.sourceHeight, link.x0, link.y0 + link.sourceHeight);
+            _this.ctx.lineTo(link.x0, link.y0 + link.sourceHeight);
+            _this.ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+            _this.ctx.fill();
+            _this.ctx.closePath();
+        });
+    };
+    return SankeyChart;
+}());
 
 var data = {
     labels: [
@@ -1268,6 +1420,28 @@ new Pie({
     type: 'pie',
     height: 250,
     colors: ['#7cd6fd', '#743ee2', 'red', 'blue', 'pink', 'grey', 'yellow']
+});
+new SankeyChart({
+    parent: document.getElementById('sankey-chart'),
+    type: 'sankey',
+    height: 400,
+    colors: ['#7cd6fd', '#743ee2', '#5e64ff', 'yellow', 'red', 'blue', 'pink', 'grey'],
+    nodes: [
+        [{ "node": 0, "name": "node0", "value": 4 },
+            { "node": 1, "name": "node1", "value": 4 }],
+        [{ "node": 2, "name": "node2", "value": 4 }],
+        [{ "node": 3, "name": "node3", "value": 4 }],
+        [{ "node": 4, "name": "node4", "value": 8 }]
+    ],
+    links: [
+        { "source": 0, "target": 2, "value": 2 },
+        { "source": 1, "target": 2, "value": 2 },
+        { "source": 1, "target": 3, "value": 2 },
+        { "source": 0, "target": 4, "value": 2 },
+        { "source": 2, "target": 3, "value": 2 },
+        { "source": 2, "target": 4, "value": 2 },
+        { "source": 3, "target": 4, "value": 4 }
+    ]
 });
 //# sourceMappingURL=demo.js.map
 
