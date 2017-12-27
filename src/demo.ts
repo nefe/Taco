@@ -2,6 +2,7 @@ import Chart from './index';
 import BarChart from './charts/Bar';
 import ScatterChart from './charts/Scatter';
 import { Pie } from 'src/charts/Pie';
+import { SankeyChart } from './charts/Sankey';
 
 import './scss/normalize.scss';
 import './scss/charts.scss';
@@ -123,4 +124,25 @@ new Pie({
   colors: ['#7cd6fd', '#743ee2', 'red', 'blue', 'pink', 'grey', 'yellow']
 });
 
-
+new SankeyChart({
+  parent: document.getElementById('sankey-chart'),
+  type: 'sankey',
+  height: 400,
+  colors: ['#7cd6fd', '#743ee2', '#5e64ff', 'yellow', 'red', 'blue', 'pink', 'grey' ],
+  nodes:[
+    [{"node":0,"name":"node0", "value": 4},
+    {"node":1,"name":"node1", "value": 4}],
+    [{"node":2,"name":"node2", "value": 4}],
+    [{"node":3,"name":"node3", "value": 4}],
+    [{"node":4,"name":"node4", "value": 8}]
+  ],
+  links:[
+    {"source":0,"target":2,"value":2},
+    {"source":1,"target":2,"value":2},
+    {"source":1,"target":3,"value":2},
+    {"source":0,"target":4,"value":2},
+    {"source":2,"target":3,"value":2},
+    {"source":2,"target":4,"value":2},
+    {"source":3,"target":4,"value":4}
+  ]
+})
