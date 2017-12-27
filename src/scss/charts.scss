@@ -147,6 +147,7 @@ line {
   border-radius: 3px;
   text-align: left;
   transition: top 200ms ease-in-out, left 200ms ease-in-out;
+  display: none;
   &.top {
     transform: translateY(-100%);
   }
