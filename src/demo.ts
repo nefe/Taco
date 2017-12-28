@@ -50,6 +50,14 @@ const chart = new BarChart({
   data,
 });
 
+const canvasChart = new BarChart({
+  parent: document.getElementById('barchart-canvas'),
+  height: 300,
+  colors: ['#7cd6fd', '#743ee2', '#5e64ff'],
+  data,
+  type: 'canvas',
+});
+
 function rnd(start = -100, end = 100){
   return Math.floor(Math.random() * (end - start) + start);
 }
@@ -60,35 +68,38 @@ function getRandomValues() {
   });
 }
 
+const newData = {
+  labels: [
+    '12am-3am',
+    '3am-6pm',
+    '6am-9am',
+    '9am-12am',
+    '12pm-3pm',
+    '3pm-6pm',
+    '6pm-9pm',
+    '9am-12am',
+    '14am-16am'
+  ],
+  datasets: [
+    {
+      title: 'Some Data',
+      values: getRandomValues(),
+    },
+    {
+      title: 'Another Set',
+      values: getRandomValues(),
+    },
+    {
+      title: "Yet Another",
+      values: getRandomValues(),
+    }
+  ]
+};
+
 setTimeout(() => {
-  chart.update({
-    labels: [
-      '12am-3am',
-      '3am-6pm',
-      '6am-9am',
-      '9am-12am',
-      '12pm-3pm',
-      '3pm-6pm',
-      '6pm-9pm',
-      '9am-12am',
-      '14am-16am'
-    ],
-    datasets: [
-      {
-        title: 'Some Data',
-        values: getRandomValues(),
-      },
-      {
-        title: 'Another Set',
-        values: getRandomValues(),
-      },
-      {
-        title: "Yet Another",
-        values: getRandomValues(),
-      }
-    ]
-  });
-}, 1000);
+  chart.update(newData);
+  canvasChart.update(newData);
+}, 3000);
 
 const scatterData = {
   datasets: [
