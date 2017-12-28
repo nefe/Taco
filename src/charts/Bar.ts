@@ -179,14 +179,32 @@ class BarChart {
     this.getValue();
   }
 
+  renderCanvas(time, allTime) {
+    if (time <= allTime) {
+      this.renderCanvasContainer();
+      this.renderCanvasAxis();
+      this.renderCanvasValue(time, allTime);
+      this.renderTooltip();
+
+      window.requestAnimationFrame(() => {
+        this.renderCanvas(time + 1, allTime);
+      });
+    }
+    return;
+  }
+
   /**
    * 渲染模块
    */
   render() {
     if (this.config.type === 'canvas') {
-      this.renderCanvasContainer();
-      this.renderCanvasAxis();
-      this.renderCanvasValue();
+      // 动画事件，每秒 60 帧
+      const dur = 1000;
+      const time = dur / 1000 * 60;
+      
+      window.requestAnimationFrame(() => {
+        this.renderCanvas(1, time);
+      });
       return;
     }
     this.renderContainer();
@@ -208,10 +226,12 @@ class BarChart {
    * 渲染 Tooltip
    */
   renderTooltip() {
-    this.tooltip = new Tooltip({
-      parent: this.chartWrapper,
-    });
-    this.bindTooltip();
+    if (!this.tooltip) {
+      this.tooltip = new Tooltip({
+        parent: this.chartWrapper,
+      });
+      this.bindTooltip();
+    }
   }
 
   /**
@@ -414,6 +434,7 @@ class BarChart {
 
   clearContainer() {
     this.parent.innerHTML = '';
+    this.tooltip = null;
   }
 
   /** 渲染 Canvas 坐标轴 */
@@ -534,17 +555,18 @@ class BarChart {
     });
   }
 
-  renderCanvasValue() {
+  renderCanvasValue(time, allTime) {
     this.dataPos.forEach((data, index) => {
       const color = this.config.colors[index];
 
       data.forEach(pos => {
         const { value, x, y, width, height, oldValue } = pos;
+
         canvas.rect(this.ctx, {
           x,
-          y,
+          y: oldValue.y + (pos.y - oldValue.y) / allTime * time,
           width,
-          height,
+          height: oldValue.height + (pos.height - oldValue.height) / allTime * time,
           fillStyle: color,
         });
       });
@@ -564,11 +586,14 @@ class BarChart {
         const dataRect = $.createSVG('rect', {
           className: 'bar',
           x,
-          y,
+          y: oldValue.y,
           width,
-          height,
+          height: oldValue.height,
           fill: color,
         });
+
+        dataG.appendChild(dataRect);
+
         const dataAniamteRect = $.createSVG('rect', {
           className: 'bar',
           x,
@@ -577,8 +602,6 @@ class BarChart {
           height,
           fill: color,
         });
-
-        dataG.appendChild(dataRect);
 
         creatSVGAnimate({
           parent: dataRect,

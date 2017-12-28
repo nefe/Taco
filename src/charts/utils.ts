@@ -106,7 +106,6 @@ export const canvas = {
 		fillStyle?: string,
 	}) => {
 		const { x, y, width, height, fillStyle } = rectConfig;
-		console.log(fillStyle);
 		ctx.fillStyle = fillStyle;
 		// ctx.rect(x, y, width, height);
 		// ctx.fill();
