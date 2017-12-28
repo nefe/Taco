@@ -49,6 +49,14 @@ const chart = new BarChart({
   data,
 });
 
+const canvasChart = new BarChart({
+  parent: document.getElementById('barchart-canvas'),
+  height: 300,
+  colors: ['#7cd6fd', '#743ee2', '#5e64ff'],
+  data,
+  type: 'canvas',
+});
+
 function rnd(start = -100, end = 100){
   return Math.floor(Math.random() * (end - start) + start);
 }
@@ -59,6 +67,7 @@ function getRandomValues() {
   });
 }
 
+/*
 setTimeout(() => {
   chart.update({
     labels: [
@@ -88,6 +97,7 @@ setTimeout(() => {
     ]
   });
 }, 1000);
+*/
 
 const scatterData = {
   datasets: [

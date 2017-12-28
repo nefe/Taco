@@ -68,6 +68,52 @@ export const $ = {
 	}
 }
 
+/** canvas 对象 */
+export const canvas = {
+	line: (ctx: CanvasRenderingContext2D, lineConfig: {
+		startX: number;
+		startY: number;
+		endX: number;
+		endY: number;
+		lineWidth?: number;
+		strokeStyle?: string;
+	}) => {
+		const { startX, startY, endX, endY, lineWidth = 1, strokeStyle = '#dadada' } = lineConfig;
+		ctx.lineWidth = lineWidth;
+		ctx.strokeStyle = strokeStyle;
+		ctx.beginPath();
+		ctx.moveTo(parseInt(String(startX)) + 0.5, parseInt(String(startY)) + 0.5);
+		ctx.lineTo(parseInt(String(endX)) + 0.5, parseInt(String(endY)) + 0.5);
+		ctx.stroke();
+	},
+	text: (ctx: CanvasRenderingContext2D, textConfig: {
+		text: string;
+		x: number;
+		y: number;
+		fontSize?: number;
+		fillStyle?: string;
+	}) => {
+		const { text, x, y, fontSize = 11, fillStyle = "#555b51" } = textConfig;
+		ctx.font = `300 ${fontSize}px Helvetica Neue, Arial, sans-serif`;
+		ctx.fillStyle = fillStyle;
+		ctx.fillText(text, x, y);
+	},
+	rect: (ctx: CanvasRenderingContext2D, rectConfig: {
+		x: number,
+		y: number,
+		width: number,
+		height: number,
+		fillStyle?: string,
+	}) => {
+		const { x, y, width, height, fillStyle } = rectConfig;
+		console.log(fillStyle);
+		ctx.fillStyle = fillStyle;
+		// ctx.rect(x, y, width, height);
+		// ctx.fill();
+		ctx.fillRect(x, y, width, height);
+	},
+}
+
 /**
  * 获取 element 在整个页面中的 top 与 left
  * @param element

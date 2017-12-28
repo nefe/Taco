@@ -1,4 +1,4 @@
-import { getElementContentWidth, floatTwo, $, offset } from "src/charts/utils";
+import { getElementContentWidth, floatTwo, $, offset, canvas } from "src/charts/utils";
 import { creatSVGAnimate } from 'src/charts/utils/draw';
 import Tooltip from './Tooltip';
 
@@ -70,6 +70,8 @@ interface BarChartConfig {
   data?: Data;
   /** 颜色数据 */
   colors: string[];
+  /** 画布类型 */
+  type?: 'svg' | 'canvas';
 }
 
 interface XAxisUnit {
@@ -137,6 +139,8 @@ interface DataPos {
 }
 
 class BarChart {
+  ctx: CanvasRenderingContext2D;
+  canvas: HTMLCanvasElement;
   oldDataPos: DataPos[][];
   tooltip: Tooltip;
   xAxisGroup: SVGElement;
@@ -179,6 +183,12 @@ class BarChart {
    * 渲染模块
    */
   render() {
+    if (this.config.type === 'canvas') {
+      this.renderCanvasContainer();
+      this.renderCanvasAxis();
+      this.renderCanvasValue();
+      return;
+    }
     this.renderContainer();
     this.renderAxis();
     this.renderValue();
@@ -353,8 +363,34 @@ class BarChart {
         }
       });
     });
+  }
 
-    console.log(this.dataPos);
+  renderCanvasContainer() {
+    // 如果当前 canvas 已存在，改变大小和清空
+    if (this.canvas && this.ctx) {
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      this.canvas.width = this.width;
+      this.canvas.height = this.height;
+      return;
+    }
+
+    this.container = $.create('div', {
+      className: 'chart-container',
+      innerHTML: `<div class="frappe-chart graphics"></div>`,
+    });
+    
+    this.parent.appendChild(this.container);
+
+    this.chartWrapper = this.container.querySelector('.frappe-chart');
+
+    this.canvas = $.create('canvas', {
+      className: 'chart',
+      parent: this.chartWrapper,
+      width: this.width,
+      height: this.height,
+    }) as HTMLCanvasElement;
+
+    this.ctx = this.canvas.getContext('2d');
   }
 
   /** 渲染外容器 */
@@ -380,7 +416,53 @@ class BarChart {
     this.parent.innerHTML = '';
   }
 
-  /** 渲染坐标 */
+  /** 渲染 Canvas 坐标轴 */
+  renderCanvasAxis() {
+    this.yAxis.unitList.forEach((unit, index) => {
+      const { pos, text } = unit;
+
+      canvas.line(this.ctx, {
+        startX: this.yAxis.startPos,
+        startY: pos,
+        endX: this.yAxis.endPos,
+        endY: pos,
+        strokeStyle: text === '0' ? 'rgba(27, 31, 35, 0.6)' : '#dadada',
+      });
+
+      const textLength = String(text).length * 6;
+
+      canvas.text(this.ctx, {
+        x: this.yAxis.startPos - textLength - 8,
+        y: pos + 5,
+        text,
+        fontSize: 11,
+      });
+    });
+
+    this.xAxis.unitList.forEach((unit, index) => {
+      const { centerPos, text } = unit;
+
+      const height = this.height - this.xAxis.height;
+      canvas.line(this.ctx, {
+        startX: centerPos,
+        startY: height,
+        endX: centerPos,
+        endY: height + this.xAxis.axisHeight,
+        strokeStyle: '#dadada',
+      });
+
+      const textLength = String(text).length * 6;
+
+      canvas.text(this.ctx, {
+        x: centerPos - textLength / 2,
+        y: height + this.xAxis.axisHeight + 16,
+        text,
+        fontSize: 11,
+      });
+    });
+  }
+
+  /** 渲染坐标轴 */
   renderAxis() {
     // 渲染 y 轴坐标
     this.yAxisGroup = $.createSVG('g', {
@@ -449,6 +531,23 @@ class BarChart {
 
       xAxisTick.appendChild(xAxisLine);
       xAxisTick.appendChild(xAxisText);
+    });
+  }
+
+  renderCanvasValue() {
+    this.dataPos.forEach((data, index) => {
+      const color = this.config.colors[index];
+
+      data.forEach(pos => {
+        const { value, x, y, width, height, oldValue } = pos;
+        canvas.rect(this.ctx, {
+          x,
+          y,
+          width,
+          height,
+          fillStyle: color,
+        });
+      });
     });
   }
 
