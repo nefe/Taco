@@ -76,3 +76,28 @@ export function makeXLine(
   ctx.fillText(String(point), xPos, textStartAt);
   ctx.restore();
 }
+
+// 计算 PIXEL Ratio
+const PIXEL_RATIO = (function () {
+  var ctx = document.createElement('canvas').getContext('2d') as any,
+      dpr = window.devicePixelRatio || 1,
+      bsr = ctx.webkitBackingStorePixelRatio ||
+            ctx.mozBackingStorePixelRatio ||
+            ctx.msBackingStorePixelRatio ||
+            ctx.oBackingStorePixelRatio ||
+            ctx.backingStorePixelRatio || 1;
+
+  return dpr / bsr;
+})();
+
+// 创建高分辨率的 Canvas
+export function setHiDPICanvas(canvas: HTMLCanvasElement, width: number, height: number, ratio?: number) {
+  if (!ratio) { ratio = PIXEL_RATIO; }
+  canvas.width = width * ratio;
+  canvas.height = height * ratio;
+  canvas.style.width = width + 'px';
+  canvas.style.height = height + 'px';
+  // canvas.getContext('2d').setTransform(ratio, 0, 0, ratio, 0, 0);
+  canvas.getContext('2d').scale(ratio, ratio);
+  return canvas;
+}

@@ -3,7 +3,7 @@
  * 我们可以推断出变量间的相关性。
  */
 import { getElementContentWidth, floatTwo } from "src/charts/utils";
-import { makeXLine, makeYLine } from "src/charts/utils/drawCanvas";
+import { makeXLine, makeYLine, setHiDPICanvas } from "src/charts/utils/drawCanvas";
 import { offset } from "src/charts/utils/dom";
 import Tooltip from 'src/charts/utils/Tooltip';
 
@@ -135,6 +135,7 @@ class ScatterCanvasChart {
     this.canvas = this.parent.querySelector('canvas');
     this.ctx = this.canvas.getContext('2d');
     this.ctx.clearRect(0, 0, this.width, this.height);
+    setHiDPICanvas(this.canvas, this.width, this.height);
   }
 
   /** listen to mouse event to show tooltip */
