@@ -3,7 +3,7 @@
  * 我们可以推断出变量间的相关性。
  */
 import { getElementContentWidth, floatTwo } from "src/charts/utils";
-import { makePath, makeXLine, makeYLine, createSVG, creatSVGAnimate } from "src/charts/utils/draw";
+import { makeXLine, makeYLine } from "src/charts/utils/drawCanvas";
 import { offset } from "src/charts/utils/dom";
 import Tooltip from 'src/charts/utils/Tooltip';
 
@@ -85,7 +85,7 @@ class YAxis {
   ticks: number[];
 }
 
-class ScatterChart {
+class ScatterCanvasChart {
   /** 用户数据 */
   data: Data;
   /** 用户配置 */
@@ -98,17 +98,43 @@ class ScatterChart {
   xAxis = new XAxis();
   yAxis = new YAxis();
 
-  chartContent: SVGElement;
+  // chartContent: SVGElement;
+  canvas: HTMLCanvasElement
+  ctx: CanvasRenderingContext2D;
   tooltip: Tooltip;
   transformedData: any[] = [];
 
   constructor(config: ScatterConfig) {
     this.config = config;
     this.data = this.config.data;
-    this.calculate();
+    this.calcSize();
+    this.initContainer();
+    this.calcAxis();
     this.render();
     this.tooltip = new Tooltip(this.parent);
     this.bindTooltips();
+  }
+
+  /**
+   * 设置图表大小，可抽象为 Base
+   */
+  calcSize() {
+    if (typeof this.config.parent === 'string') {
+      this.parent = document.querySelector(this.config.parent);
+    } else {
+      this.parent = this.config.parent;
+    }
+    this.width = getElementContentWidth(this.parent);
+    this.height = DEFAULT_HEIGHT;
+  }
+
+  initContainer() {
+    this.parent.innerHTML = `<canvas class="scatter-container" width=${
+      this.width
+    } height=${this.height} />`;
+    this.canvas = this.parent.querySelector('canvas');
+    this.ctx = this.canvas.getContext('2d');
+    this.ctx.clearRect(0, 0, this.width, this.height);
   }
 
   /** listen to mouse event to show tooltip */
@@ -146,30 +172,9 @@ class ScatterChart {
   }
 
   /**
-   * 计算模块
-   */
-  calculate() {
-    this.getSize();
-    this.getAxis();
-  }
-
-  /**
-   * 设置图表大小，可抽象为 Base
-   */
-  getSize() {
-    if (typeof this.config.parent === 'string') {
-      this.parent = document.querySelector(this.config.parent);
-    } else {
-      this.parent = this.config.parent;
-    }
-    this.width = getElementContentWidth(this.parent);
-    this.height = DEFAULT_HEIGHT;
-  }
-
-  /**
    * 设置坐标轴大小，可抽象为 Axis
    */
-  getAxis() {
+  calcAxis() {
     // y 轴
     this.xAxis.ticks = calcIntervalsOfArray(this.data.datasets[0].values);
     this.yAxis.ticks = calcIntervalsOfArray(this.data.datasets[1].values);
@@ -179,44 +184,34 @@ class ScatterChart {
    * 渲染模块
    */
   render() {
-    // 添加画布
-    const svg = createSVG('svg', {
-      className: 'chart',
-      fill: 'none',
-      width: this.width,
-      height: this.height,
-    });
-    this.chartContent = createSVG('g', {
-      className: 'scatter-chart',
-      transform: 'translate(40, 10)',
-      parent: svg
-    });
+    // 添加画布: canvas 不需要
+    // const svg = createSVG('svg', {
+    //   className: 'chart',
+    //   fill: 'none',
+    //   width: this.width,
+    //   height: this.height,
+    // });
+    // diff1: translate 等都有等价表现
+    // diff2: 不支持 css，所以不能用 css
+    this.ctx.translate(40, 10);
 
     const contentWidth = this.width - 40;
     const contentHeight = this.height - 20;
 
     // 开始画X坐标轴
-    const xAxisGroup = createSVG('g', {
-      className: 'x axis',
-      transform: `translate(0, -7)`,
-      parent: this.chartContent
-    });
     this.xAxis.ticks.forEach((val: number, index: number) => {
       const xPosUnit = (contentWidth - 30) / (this.xAxis.ticks.length - 1)
-
-      const xLine = makeXLine(contentHeight - 20, contentHeight - 10, val, index * xPosUnit);
-      xAxisGroup.appendChild(xLine);
+      this.ctx.save();
+      this.ctx.translate(0, -7);
+      const xLine = makeXLine(this.ctx, contentHeight - 20, contentHeight - 10, val, index * xPosUnit);
+      this.ctx.restore();
+      // xAxisGroup.appendChild(xLine);
     });
 
     // 开始画Y坐标轴
-    const yAxisGroup = createSVG('g', {
-      className: 'y axis',
-      parent: this.chartContent
-    });
     this.yAxis.ticks.forEach((val: number, index: number) => {
       const yPosUnit = (contentHeight - 35) / (this.yAxis.ticks.length - 1)
-      const yLine = makeYLine(-7, contentWidth - 25, -10, val, yPosUnit * (this.yAxis.ticks.length - index - 1));
-      yAxisGroup.appendChild(yLine);
+      const yLine = makeYLine(this.ctx, -7, contentWidth - 25, -10, val, yPosUnit * (this.yAxis.ticks.length - index - 1));
     });
 
     // 转换数据为易处理的格式
@@ -246,35 +241,14 @@ class ScatterChart {
     });
     this.transformedData = transformedData;
 
-    // 画散点图中的数据点
-    const dataPoints = createSVG('g', {
-      className: 'data-points',
-      parent: this.chartContent
-    });
-    const pattern = this.config.pattern;
     transformedData.forEach(data => {
-      const circle = createSVG('circle', {
-        r: 5,
-        fill: 'red',
-        opacity: data.zPercent,
-      });
-      creatSVGAnimate({
-        parent: circle,
-        dur: 1000,
-        new: {
-          cx: data.xPos,
-          cy: data.yPos,
-        },
-        old: {
-          cx: data.xPos,
-          cy: contentHeight - 20,
-        }
-      });
-      dataPoints.appendChild(circle);
-    })
-
-    this.parent.appendChild(svg);
+      this.ctx.beginPath();
+      this.ctx.arc(data.xPos, data.yPos, 5, 0, Math.PI * 2);
+      this.ctx.fillStyle = 'red';
+      this.ctx.fill();
+      this.ctx.closePath();
+    });
   }
 }
 
-export default ScatterChart;
+export default ScatterCanvasChart;

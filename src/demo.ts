@@ -1,6 +1,7 @@
 import Chart from './index';
 import BarChart from './charts/Bar';
 import ScatterChart from './charts/Scatter';
+import ScatterCanvasChart from './charts/ScatterCanvas';
 import { Pie } from 'src/charts/Pie';
 import { SankeyChart } from './charts/Sankey';
 
@@ -125,6 +126,12 @@ new ScatterChart({
   data: scatterData,
 });
 
+new ScatterCanvasChart({
+  parent: document.getElementById('scatter-canvas-chart'),
+  height: 250,
+  pattern: ['size', 'year', 'price'],
+  data: scatterData,
+});
 
 new Pie({
   parent: document.getElementById('pie-chart'),
